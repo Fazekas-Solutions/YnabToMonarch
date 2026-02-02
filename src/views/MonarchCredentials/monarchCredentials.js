@@ -12,7 +12,7 @@ export default async function initMonarchCredentialsView() {
       showDataButton: true
     },
     header: {
-      title: 'Step 4: Auto Migration',
+      title: 'Step 5: Auto Migration',
       description: 'Authorize your Monarch account so we can directly import your accounts and transactions.',
       containerId: 'pageHeader'
     }
@@ -75,7 +75,7 @@ export default async function initMonarchCredentialsView() {
 
     switch (status) {
       case 'remembered':
-        UI.securityNoteMsg.innerHTML = 'Your credentials will be encrypted and saved to this device. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Manage stored data</a>.';
+        UI.securityNoteMsg.innerHTML = 'Your encrypted credentials will be saved to this device. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Manage stored data</a>.';
         UI.securityNoteIcon.setAttribute('fill', COLOR.ORANGE);
         break;
       case 'signed-in':
@@ -83,7 +83,7 @@ export default async function initMonarchCredentialsView() {
         UI.securityNoteIcon.setAttribute('fill', COLOR.BLUE);
         break;
       default:
-        UI.securityNoteMsg.textContent = 'Your credentials will only be used for this session and will not be saved.';
+        UI.securityNoteMsg.innerHTML = '<strong>Secure Session:</strong> Your credentials will only be stored in this tab&apos;s memory and will be cleared when the tab closes. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Learn more</a>.';
         UI.securityNoteIcon.setAttribute('fill', COLOR.GREEN);
     }
     
@@ -112,7 +112,7 @@ export default async function initMonarchCredentialsView() {
       emailInput: UI.emailInput.value,
       passwordInput: UI.passwordInput.value,
       creds,
-      UI
+      rememberChecked: UI.rememberCheckbox.checked
     });
 
     if (result.error) {

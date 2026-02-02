@@ -200,6 +200,9 @@ export default class Accounts {
     }
   }
 
+  /** Returns the number of accounts.
+   * @returns {number} The number of accounts
+   */
   length() {
     return this._accounts.size;
   }

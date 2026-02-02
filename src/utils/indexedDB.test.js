@@ -162,64 +162,6 @@ describe('FinancialDataDB', () => {
     });
   });
 
-  describe('saveMetadata', () => {
-    it('saves metadata key-value pair', async () => {
-      const FinancialDataDB = (await import('./indexedDB.js')).default;
-      
-      const initPromise = FinancialDataDB.init();
-      mockOpenRequest.onsuccess?.();
-      await initPromise;
-
-      const putRequest = { onsuccess: null };
-      mockObjectStore.put.mockReturnValue(putRequest);
-
-      const promise = FinancialDataDB.saveMetadata('lastSync', 12345);
-      putRequest.onsuccess?.();
-      await promise;
-
-      expect(mockObjectStore.put).toHaveBeenCalled();
-    });
-  });
-
-  describe('getMetadata', () => {
-    it('retrieves metadata by key', async () => {
-      const FinancialDataDB = (await import('./indexedDB.js')).default;
-      
-      const initPromise = FinancialDataDB.init();
-      mockOpenRequest.onsuccess?.();
-      await initPromise;
-
-      const getRequest = { 
-        onsuccess: null, 
-        result: { key: 'lastSync', value: 12345 } 
-      };
-      mockObjectStore.get.mockReturnValue(getRequest);
-
-      const promise = FinancialDataDB.getMetadata('lastSync');
-      getRequest.onsuccess?.();
-      const result = await promise;
-
-      expect(result).toBe(12345);
-    });
-
-    it('returns null for non-existent key', async () => {
-      const FinancialDataDB = (await import('./indexedDB.js')).default;
-      
-      const initPromise = FinancialDataDB.init();
-      mockOpenRequest.onsuccess?.();
-      await initPromise;
-
-      const getRequest = { onsuccess: null, result: null };
-      mockObjectStore.get.mockReturnValue(getRequest);
-
-      const promise = FinancialDataDB.getMetadata('nonexistent');
-      getRequest.onsuccess?.();
-      const result = await promise;
-
-      expect(result).toBeNull();
-    });
-  });
-
   describe('close', () => {
     it('closes database connection', async () => {
       const FinancialDataDB = (await import('./indexedDB.js')).default;

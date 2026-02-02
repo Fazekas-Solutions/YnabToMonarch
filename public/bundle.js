@@ -5827,10 +5827,6 @@
             uploadStore.createIndex("timestamp", "timestamp", { unique: false });
             console.log('Created "uploadStates" object store');
           }
-          if (!db2.objectStoreNames.contains("metadata")) {
-            db2.createObjectStore("metadata", { keyPath: "key" });
-            console.log('Created "metadata" object store');
-          }
           console.groupEnd();
         };
       });
@@ -5847,7 +5843,7 @@
         console.groupEnd();
         return;
       }
-      console.log(`Saving ${accountsData.accounts.length} accounts to IndexedDB`);
+      console.log(`Saving ${accountsData.accounts.length} accounts to IndexedDB...`);
       return new Promise((resolve, reject) => {
         const tx = this.db.transaction(["accounts", "transactions"], "readwrite");
         const accountStore = tx.objectStore("accounts");
@@ -6246,53 +6242,6 @@
           console.error("Error clearing upload states:", tx.error);
           console.groupEnd();
           reject(tx.error);
-        };
-      });
-    }
-    async saveMetadata(key, value) {
-      console.group("saveMetadata:");
-      if (!isIndexedDBAvailable || !this.db) {
-        console.warn("IndexedDB not initialized, skipping metadata save");
-        console.groupEnd();
-        return;
-      }
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction("metadata", "readwrite");
-        const store = tx.objectStore("metadata");
-        const request = store.put({ key, value, timestamp: Date.now() });
-        request.onsuccess = () => {
-          console.log(`\u2705 Metadata for key "${key}" saved`);
-          console.groupEnd();
-          resolve();
-        };
-        request.onerror = () => {
-          console.error("Error saving metadata:", request.error);
-          console.groupEnd();
-          reject(request.error);
-        };
-      });
-    }
-    async getMetadata(key) {
-      console.group("getMetadata:");
-      if (!isIndexedDBAvailable || !this.db) {
-        console.warn("IndexedDB not initialized, returning null");
-        console.groupEnd();
-        return null;
-      }
-      return new Promise((resolve, reject) => {
-        const tx = this.db.transaction("metadata", "readonly");
-        const store = tx.objectStore("metadata");
-        const request = store.get(key);
-        request.onsuccess = () => {
-          const result = request.result;
-          console.log(`\u2705 Retrieved metadata for key "${key}":`, result);
-          console.groupEnd();
-          resolve(result ? result.value : null);
-        };
-        request.onerror = () => {
-          console.error("Error retrieving metadata:", request.error);
-          console.groupEnd();
-          resolve(null);
         };
       });
     }
@@ -6847,41 +6796,6 @@ Existing Account:`, this._accounts.get(account.id));
     }
   }
 
-  // src/state.js
-  var StorageManager = class {
-    constructor() {
-      this.monarchCredentials = {
-        email: null,
-        encryptedPassword: null,
-        accessToken: null,
-        uuid: null,
-        otp: null
-      };
-      this.history = [];
-      this.userPreferences = {};
-    }
-    _lsGet(key) {
-      return localStorage.getItem(key);
-    }
-    _lsSet(key, value) {
-      localStorage.setItem(key, value);
-    }
-    _lsRemove(key) {
-      localStorage.removeItem(key);
-    }
-    _ssGet(key) {
-      return sessionStorage.getItem(key);
-    }
-    _ssSet(key, value) {
-      sessionStorage.setItem(key, value);
-    }
-    _ssRemove(key) {
-      sessionStorage.removeItem(key);
-    }
-  };
-  var State = new StorageManager();
-  var state_default = State;
-
   // src/api/ynabApi.js
   async function redirectToYnabOauth() {
     await startYnabOauth();
@@ -6902,9 +6816,7 @@ Existing Account:`, this._accounts.get(account.id));
       if (response.error) {
         throw new Error(response.error.id, response.error.name, response.error.detail);
       }
-      console.warn("getAccounts response:", response);
       const accountData = response.data.accounts;
-      console.warn("getAccounts accountData:", accountData);
       const accountList = new Accounts();
       accountData.forEach((acc) => {
         const account = new Account(acc["id"]);
@@ -6965,7 +6877,6 @@ Existing Account:`, this._accounts.get(account.id));
       console.error("Failed to exchange authorization code for tokens.");
       throw new Error("Failed to exchange authorization code for tokens.");
     }
-    console.table(state_default);
     return "success";
   }
   var ynabApi = {
@@ -6977,6 +6888,41 @@ Existing Account:`, this._accounts.get(account.id));
     getAllData
   };
   var ynabApi_default = ynabApi;
+
+  // src/state.js
+  var StorageManager = class {
+    constructor() {
+      this.monarchCredentials = {
+        email: null,
+        encryptedPassword: null,
+        accessToken: null,
+        uuid: null,
+        otp: null
+      };
+      this.history = [];
+      this.userPreferences = {};
+    }
+    _lsGet(key) {
+      return localStorage.getItem(key);
+    }
+    _lsSet(key, value) {
+      localStorage.setItem(key, value);
+    }
+    _lsRemove(key) {
+      localStorage.removeItem(key);
+    }
+    _ssGet(key) {
+      return sessionStorage.getItem(key);
+    }
+    _ssSet(key, value) {
+      sessionStorage.setItem(key, value);
+    }
+    _ssRemove(key) {
+      sessionStorage.removeItem(key);
+    }
+  };
+  var State = new StorageManager();
+  var state_default = State;
 
   // src/components/pageLayout.js
   function renderPageLayout(options = {}) {
@@ -9569,24 +9515,22 @@ Existing Account:`, this._accounts.get(account.id));
 </style>`;
 
   // src/views/MethodSelect/method.js
-  function initMethodSelectView() {
+  async function initMethodSelectView() {
     renderPageLayout({
       navbar: {
         showBackButton: true,
         showDataButton: true
       },
       header: {
-        title: "Step 3: Choose Your Migration Method",
+        title: "Step 4: Choose Your Migration Method",
         description: "Either manually import your accounts into Monarch Money yourself or let us automate the process.",
         containerId: "pageHeader"
       }
     });
-    const totalCount = state_default.accounts.length();
-    const selectedCount = state_default.accounts._accounts.filter((acc) => acc.included).length;
-    document.getElementById("totalCountDisplay").textContent = totalCount;
-    document.getElementById("filesCountDisplay").textContent = selectedCount;
-    document.getElementById("manualFileCount").textContent = selectedCount;
-    document.getElementById("manualFileLabel").textContent = selectedCount === 1 ? "file" : "files";
+    const accounts = new Accounts();
+    await accounts.loadFromDb();
+    const manualFileCountElement = document.getElementById("manualFileCount");
+    manualFileCountElement.textContent = accounts.length();
     document.getElementById("manualImportCard").addEventListener("card-click", () => {
       navigate("/manual");
     });
@@ -9596,7 +9540,7 @@ Existing Account:`, this._accounts.get(account.id));
   }
 
   // src/views/MethodSelect/method.html
-  var method_default = '<div id="pageLayout"></div>\n\n<!-- Summary Counts -->\n<div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-10 \n          bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-6 md:p-8 \n          border border-blue-100 w-full max-w-2xl mx-auto shadow-sm mb-12">\n\n  <div class="text-center">\n    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-500" id="totalCountDisplay">0</div>\n    <div class="text-gray-500 text-xs sm:text-sm md:text-base font-medium">Total Accounts</div>\n  </div>\n\n  <div class="hidden sm:block w-px h-12 bg-gray-300"></div>\n  <div class="sm:hidden w-full h-px bg-gray-300"></div>\n\n  <div class="text-center">\n    <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-green-600" id="filesCountDisplay">0</div>\n    <div class="text-gray-600 text-xs sm:text-sm md:text-base font-medium">Accounts To Migrate</div>\n  </div>\n</div>\n\n<!-- Migration Options -->\n<div class="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl mx-auto">\n\n  <!-- Manual Import -->\n  <clickable-card id="manualImportCard" data-color="blue" data-width="full">\n    <svg slot="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n        d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />\n    </svg>\n    <svg slot="arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />\n    </svg>\n    <h3 slot="title">Manual Import</h3>\n    <p slot="description">\n      Download <span id="manualFileCount" class="font-semibold text-blue-600">0</span> CSV <span id="manualFileLabel">files</span> and upload them\n      into Monarch Money yourself, one by one.\n    </p>\n    <span slot="action">Select Manual Import</span>\n  </clickable-card>\n\n  <!-- Auto Import -->\n  <clickable-card id="autoImportCard" data-color="green" data-width="full">\n    <svg slot="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />\n    </svg>\n    <svg slot="arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />\n    </svg>\n    <h3 slot="title">Auto Import</h3>\n    <p slot="description">\n      Connect your Monarch Money account and automatically import your selected accounts.\n    </p>\n    <span slot="action">Select Auto Import</span>\n  </clickable-card>\n\n</div>';
+  var method_default = '<div id="pageLayout"></div>\n\n<!-- Migration Options -->\n<div class="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl mx-auto">\n\n  <!-- Manual Import -->\n  <clickable-card id="manualImportCard" data-color="blue" data-width="full">\n    <svg slot="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n        d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />\n    </svg>\n    <svg slot="arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />\n    </svg>\n    <h3 slot="title">Manual Import</h3>\n    <p slot="description">\n      Download <span id="manualFileCount" class="font-semibold text-blue-600">0</span> CSV <span id="manualFileLabel">files</span> and upload them\n      into Monarch Money yourself, one by one.\n    </p>\n    <span slot="action">Select Manual Import</span>\n  </clickable-card>\n\n  <!-- Auto Import -->\n  <clickable-card id="autoImportCard" data-color="green" data-width="full">\n    <svg slot="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />\n    </svg>\n    <svg slot="arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />\n    </svg>\n    <h3 slot="title">Auto Import</h3>\n    <p slot="description">\n      Connect your Monarch Money account and automatically import your selected accounts.\n    </p>\n    <span slot="action">Select Auto Import</span>\n  </clickable-card>\n\n</div>';
 
   // src/views/ManualInstructions/manualInstructionsData.js
   var import_jszip = __toESM(require_jszip_min(), 1);
@@ -9668,6 +9612,8 @@ Existing Account:`, this._accounts.get(account.id));
   // src/views/ManualInstructions/manualInstructions.html
   var manualInstructions_default = `<div id="pageLayout"></div>
 
+<!-- TODO: Describe the instructions for importing bank-synced accounts. -->
+
 <!-- Main Instructions Card -->
 <section
   class="w-full max-w-4xl bg-white border border-gray-200 rounded-xl shadow-lg p-6 sm:p-8 md:p-10 space-y-8 sm:space-y-10 md:max-w-4xl mx-auto">
@@ -9726,7 +9672,7 @@ Existing Account:`, this._accounts.get(account.id));
 
     <div class="ml-11 sm:ml-14">
       <p class="text-gray-600 mb-4 sm:mb-6 text-sm sm:text-base leading-relaxed">
-        Follow these steps in your Monarch Money account to import each CSV file:
+        Follow these steps in your Monarch Money profile to import each CSV file:
       </p>
 
       <div class="bg-gray-50 rounded-lg p-4 sm:p-6 border border-gray-100">
@@ -9989,29 +9935,34 @@ Existing Account:`, this._accounts.get(account.id));
 
   // src/views/MonarchCredentials/monarchCredentialsData.js
   function initCredentials() {
-    const creds = state_default.credentials;
-    const email = sessionStorage.getItem("monarch_email");
-    const encryptedPassword = sessionStorage.getItem("monarch_pwd_enc");
-    const token = sessionStorage.getItem("monarch_token");
-    const uuid = sessionStorage.getItem("monarch_uuid");
-    state_default.setCredentials({
-      email: creds.email || email,
-      encryptedPassword: creds.encryptedPassword || encryptedPassword,
-      apiToken: creds.apiToken || token,
-      deviceUuid: creds.deviceUuid || uuid,
-      remember: false
-    });
-    if (!creds.deviceUuid || creds.deviceUuid === "") {
-      creds.deviceUuid = v4_default();
-      sessionStorage.setItem("monarch_uuid", creds.deviceUuid);
+    const persistedEmail = localStorage.getItem("monarch_email_persisted");
+    const persistedEncrypted = localStorage.getItem("monarch_pwd_enc_persisted");
+    const persistedRemember = localStorage.getItem("monarch_remember") === "true";
+    const sessionEmail = sessionStorage.getItem("monarch_email");
+    const sessionEncrypted = sessionStorage.getItem("monarch_pwd_enc");
+    const sessionToken = sessionStorage.getItem("monarch_token");
+    const sessionUuid = sessionStorage.getItem("monarch_uuid");
+    const email = persistedEmail || sessionEmail;
+    const encryptedPassword = persistedEncrypted || sessionEncrypted;
+    const token = sessionToken;
+    const uuid = sessionUuid;
+    const isRemembered = persistedRemember;
+    state_default.monarchCredentials.email = email;
+    state_default.monarchCredentials.encryptedPassword = encryptedPassword;
+    state_default.monarchCredentials.accessToken = token;
+    state_default.monarchCredentials.uuid = uuid;
+    state_default.monarchCredentials.remember = isRemembered;
+    if (!state_default.monarchCredentials.uuid || state_default.monarchCredentials.uuid === "") {
+      state_default.monarchCredentials.uuid = v4_default();
+      sessionStorage.setItem("monarch_uuid", state_default.monarchCredentials.uuid);
     }
-    return { creds };
+    return { creds: state_default.monarchCredentials };
   }
-  async function attemptLogin({ emailInput, passwordInput, creds, UI }) {
-    const email = emailInput.trim() || sessionStorage.getItem("monarch_email");
+  async function attemptLogin({ emailInput, passwordInput, creds, rememberChecked }) {
+    const email = emailInput.trim();
     const plaintextPassword = passwordInput.trim();
-    let encryptedPassword = creds.encryptedPassword || sessionStorage.getItem("monarch_pwd_enc");
-    const uuid = creds.deviceUuid || sessionStorage.getItem("monarch_uuid");
+    let encryptedPassword = creds.encryptedPassword;
+    const uuid = creds.uuid;
     if (!encryptedPassword && plaintextPassword) {
       try {
         encryptedPassword = await encryptPassword(email, plaintextPassword);
@@ -10022,27 +9973,20 @@ Existing Account:`, this._accounts.get(account.id));
     try {
       const response = await monarchApi.login(email, encryptedPassword, uuid);
       if (response?.otpRequired) {
-        state_default.saveToLocalStorage({
-          email,
-          encryptedPassword,
-          uuid,
-          remember: creds.remember,
-          tempForOtp: !creds.remember
-        });
-        state_default.setCredentials({ awaitingOtp: true });
+        storeCredentialsTemporarily(email, encryptedPassword);
+        state_default.monarchCredentials.otp = null;
         return { otpRequired: true };
       }
       if (response?.token) {
-        state_default.setCredentials({
-          email,
-          encryptedPassword,
-          otp: "",
-          remember: UI.rememberCheckbox.checked,
-          apiToken: response.token,
-          awaitingOtp: false
-        });
-        if (creds.remember) {
-          state_default.saveToLocalStorage({ email, encryptedPassword, token: response.token, remember: true });
+        state_default.monarchCredentials.email = email;
+        state_default.monarchCredentials.encryptedPassword = encryptedPassword;
+        state_default.monarchCredentials.accessToken = response.token;
+        state_default.monarchCredentials.remember = rememberChecked;
+        state_default.monarchCredentials.otp = "";
+        if (rememberChecked) {
+          storeCredentialsPersistently(email, encryptedPassword);
+        } else {
+          storeCredentialsTemporarily(email, encryptedPassword);
         }
         return { token: response.token };
       }
@@ -10052,11 +9996,34 @@ Existing Account:`, this._accounts.get(account.id));
       return { error: err.message || String(err) };
     }
   }
+  function storeCredentialsTemporarily(email, encryptedPassword) {
+    sessionStorage.setItem("monarch_email", email);
+    sessionStorage.setItem("monarch_pwd_enc", encryptedPassword);
+    localStorage.removeItem("monarch_email_persisted");
+    localStorage.removeItem("monarch_pwd_enc_persisted");
+    localStorage.removeItem("monarch_remember");
+  }
+  function storeCredentialsPersistently(email, encryptedPassword) {
+    localStorage.setItem("monarch_email_persisted", email);
+    localStorage.setItem("monarch_pwd_enc_persisted", encryptedPassword);
+    localStorage.setItem("monarch_remember", "true");
+    sessionStorage.setItem("monarch_email", email);
+    sessionStorage.setItem("monarch_pwd_enc", encryptedPassword);
+  }
   function clearCredentialsAndReset() {
-    state_default.clearLocalStorage();
-    state_default.credentials.clear();
-    state_default.credentials.deviceUuid = v4_default();
-    state_default.saveToLocalStorage({ uuid: state_default.credentials.deviceUuid });
+    sessionStorage.removeItem("monarch_email");
+    sessionStorage.removeItem("monarch_pwd_enc");
+    sessionStorage.removeItem("monarch_token");
+    localStorage.removeItem("monarch_email_persisted");
+    localStorage.removeItem("monarch_pwd_enc_persisted");
+    localStorage.removeItem("monarch_remember");
+    state_default.monarchCredentials.email = null;
+    state_default.monarchCredentials.encryptedPassword = null;
+    state_default.monarchCredentials.accessToken = null;
+    state_default.monarchCredentials.otp = null;
+    state_default.monarchCredentials.remember = false;
+    state_default.monarchCredentials.uuid = v4_default();
+    sessionStorage.setItem("monarch_uuid", state_default.monarchCredentials.uuid);
   }
 
   // src/views/MonarchCredentials/monarchCredentials.js
@@ -10067,7 +10034,7 @@ Existing Account:`, this._accounts.get(account.id));
         showDataButton: true
       },
       header: {
-        title: "Step 4: Auto Migration",
+        title: "Step 5: Auto Migration",
         description: "Authorize your Monarch account so we can directly import your accounts and transactions.",
         containerId: "pageHeader"
       }
@@ -10122,7 +10089,7 @@ Existing Account:`, this._accounts.get(account.id));
       };
       switch (status) {
         case "remembered":
-          UI.securityNoteMsg.innerHTML = 'Your credentials will be encrypted and saved to this device. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Manage stored data</a>.';
+          UI.securityNoteMsg.innerHTML = 'Your encrypted credentials will be saved to this device. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Manage stored data</a>.';
           UI.securityNoteIcon.setAttribute("fill", COLOR.ORANGE);
           break;
         case "signed-in":
@@ -10130,7 +10097,7 @@ Existing Account:`, this._accounts.get(account.id));
           UI.securityNoteIcon.setAttribute("fill", COLOR.BLUE);
           break;
         default:
-          UI.securityNoteMsg.textContent = "Your credentials will only be used for this session and will not be saved.";
+          UI.securityNoteMsg.innerHTML = '<strong>Secure Session:</strong> Your credentials will only be stored in this tab&apos;s memory and will be cleared when the tab closes. <a href="#" data-nav="/data-management" class="text-blue-600 hover:text-blue-800 underline">Learn more</a>.';
           UI.securityNoteIcon.setAttribute("fill", COLOR.GREEN);
       }
       const links = UI.securityNoteMsg.querySelectorAll("[data-nav]");
@@ -10154,7 +10121,7 @@ Existing Account:`, this._accounts.get(account.id));
         emailInput: UI.emailInput.value,
         passwordInput: UI.passwordInput.value,
         creds,
-        UI
+        rememberChecked: UI.rememberCheckbox.checked
       });
       if (result.error) {
         showError(result.error);
@@ -10217,183 +10184,26 @@ Existing Account:`, this._accounts.get(account.id));
   }
 
   // src/views/MonarchCredentials/monarchCredentials.html
-  var monarchCredentials_default = `<div id="pageLayout"></div>
-
-<!-- Main Form Container -->
-<div class="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-xl shadow-lg p-6 sm:p-8 md:p-10">
-
-  <form id="credentialsForm" class="space-y-4 sm:space-y-6">
-
-    <!-- Email Field -->
-    <div class="space-y-2">
-      <label class="block font-semibold text-sm sm:text-base text-gray-900 cursor-pointer" for="email">
-        Email Address
-      </label>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-          </svg>
-        </div>
-        <input id="email" type="email" class="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base 
-                        border border-gray-300 rounded-lg placeholder-gray-400 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                        transition-colors duration-200" placeholder="you@email.com" autocomplete="username" required>
-      </div>
-    </div>
-
-    <!-- Password Field -->
-    <div class="space-y-2">
-      <label class="block font-semibold text-sm sm:text-base text-gray-900 cursor-pointer" for="password">
-        Password
-      </label>
-      <div class="relative">
-        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-        </div>
-        <input id="password" type="password" class="block w-full pl-9 sm:pl-10 pr-12 sm:pr-14 py-2.5 sm:py-3 text-sm sm:text-base 
-                        border border-gray-300 rounded-lg placeholder-gray-400 
-                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                        transition-colors duration-200" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" autocomplete="current-password"
-          required>
-
-        <button type="button" id="togglePassword" aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer 
-                         text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 
-                         transition-colors duration-200">
-          <!-- Show Icon -->
-          <svg id="eyeShow" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-
-          <!-- Hide Icon -->
-          <svg id="eyeHide" class="h-4 w-4 sm:h-5 sm:w-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.27-2.945-9.543-7a9.966 9.966 0 012.398-4.442M9.88 9.88a3 3 0 104.24 4.24M6.1 6.1L17.9 17.9" />
-          </svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- Remember Me Checkbox -->
-    <div id="rememberMe" class="flex items-start gap-3">
-      <div class="flex items-center h-5">
-        <input id="rememberCredentials" type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer rounded border-gray-300 
-                        text-blue-600 focus:ring-blue-500 focus:ring-2">
-      </div>
-      <div class="text-sm sm:text-base">
-        <label for="rememberCredentials" class="text-gray-700 cursor-pointer leading-relaxed">
-          Remember me for this session
-          <span class="block text-xs text-gray-500 mt-1">
-            We'll securely store your credentials locally for convenience
-          </span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Not You? -->
-    <div id="notYouContainer" class="mt-2 text-sm text-gray-500 hidden">
-      <span id="rememberedEmail">"some@thing.com"</span>
-      <ui-button id="clearCredentialsBtn" data-type="text" data-size="small">
-        Not You?
-      </ui-button>
-    </div>
-
-    <!-- Error Message -->
-    <div id="credentialsError" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">
-      <div class="flex items-start gap-2">
-        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd"
-            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-            clip-rule="evenodd" />
-        </svg>
-        <p id="errorBox" class="text-sm text-red-800">Error message will appear here</p>
-      </div>
-    </div>
-
-    <!-- Submit Button -->
-    <ui-button id="connectBtn" type="submit" data-type="solid" data-size="large">
-      <span id="loginBtnText">Connect to Monarch</span>
-      <svg id="loginSpinner" class="hidden animate-spin ml-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-        </path>
-      </svg>
-    </ui-button>
-  </form>
-
-  <!-- Security Note -->
-  <div class="flex items-start gap-3 mt-6 sm:mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">
-    <div class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5">
-      <svg id="securityNoteIcon" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
-        <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none" />
-      </svg>
-    </div>
-    <div>
-      <p id="securityNote" class="text-xs sm:text-sm text-green-800 leading-relaxed">
-        <strong>Secure Connection:</strong> Your credentials are transmitted using bank-level encryption
-        and are never stored on our servers. We use the same security standards as major financial institutions.
-      </p>
-    </div>
-  </div>
-
-</div>
-
-<style>
-  input[type="password"]::-ms-reveal,
-  input[type="password"]::-ms-clear,
-  input[type="password"]::-webkit-credentials-auto-fill-button,
-  input[type="password"]::-webkit-inner-spin-button,
-  input[type="password"]::-webkit-clear-button {
-    display: none !important;
-    appearance: none;
-  }
-
-  input[type="password"]::-webkit-credentials-auto-fill-button {
-    display: none !important;
-    visibility: hidden;
-  }
-
-  #togglePassword,
-  #clearCredentialsBtn {
-    transition: none !important;
-    box-shadow: none !important;
-    transform: none !important;
-  }
-</style>`;
+  var monarchCredentials_default = '<div id="pageLayout"></div>\n\n<!-- Main Form Container -->\n<div class="w-full max-w-md mx-auto bg-white border border-gray-200 rounded-xl shadow-lg p-6 sm:p-8 md:p-10">\n\n  <form id="credentialsForm" class="space-y-4 sm:space-y-6">\n\n    <!-- Email Field -->\n    <div class="space-y-2">\n      <label class="block font-semibold text-sm sm:text-base text-gray-900 cursor-pointer" for="email">\n        Email Address\n      </label>\n      <div class="relative">\n        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">\n          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n              d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />\n          </svg>\n        </div>\n        <input id="email" type="email" class="block w-full pl-9 sm:pl-10 pr-3 py-2.5 sm:py-3 text-sm sm:text-base \n                        border border-gray-300 rounded-lg placeholder-gray-400 \n                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 \n                        transition-colors duration-200" placeholder="you@email.com" autocomplete="username" required>\n      </div>\n    </div>\n\n    <!-- Password Field -->\n    <div class="space-y-2">\n      <label class="block font-semibold text-sm sm:text-base text-gray-900 cursor-pointer" for="password">\n        Password\n      </label>\n      <div class="relative">\n        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">\n          <svg class="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />\n          </svg>\n        </div>\n        <input id="password" type="password" class="block w-full pl-9 sm:pl-10 pr-12 sm:pr-14 py-2.5 sm:py-3 text-sm sm:text-base \n                        border border-gray-300 rounded-lg placeholder-gray-400 \n                        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 \n                        transition-colors duration-200" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" autocomplete="current-password"\n          required>\n\n        <button type="button" id="togglePassword" aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer \n                         text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 \n                         transition-colors duration-200">\n          <!-- Show Icon -->\n          <svg id="eyeShow" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />\n            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />\n          </svg>\n\n          <!-- Hide Icon -->\n          <svg id="eyeHide" class="h-4 w-4 sm:h-5 sm:w-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">\n            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"\n              d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.27-2.945-9.543-7a9.966 9.966 0 012.398-4.442M9.88 9.88a3 3 0 104.24 4.24M6.1 6.1L17.9 17.9" />\n          </svg>\n        </button>\n      </div>\n    </div>\n\n    <!-- Remember Me Checkbox -->\n    <div id="rememberMe" class="flex items-start gap-3">\n      <div class="flex items-center h-5">\n        <input id="rememberCredentials" type="checkbox" class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer rounded border-gray-300 \n                        text-blue-600 focus:ring-blue-500 focus:ring-2">\n      </div>\n      <div class="text-sm sm:text-base">\n        <label for="rememberCredentials" class="text-gray-700 cursor-pointer leading-relaxed">\n          Save credentials on this device\n          <span class="block text-xs text-gray-500 mt-1">\n            Your password will be encrypted and stored locally. Uncheck to use session-only credentials.\n          </span>\n        </label>\n      </div>\n    </div>\n\n    <!-- Not You? -->\n    <div id="notYouContainer" class="mt-2 text-sm text-gray-500 hidden">\n      <span id="rememberedEmail">"some@thing.com"</span>\n      <ui-button id="clearCredentialsBtn" data-type="text" data-size="small">\n        Not You?\n      </ui-button>\n    </div>\n\n    <!-- Error Message -->\n    <div id="credentialsError" class="hidden bg-red-50 border border-red-200 rounded-lg p-3">\n      <div class="flex items-start gap-2">\n        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">\n          <path fill-rule="evenodd"\n            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"\n            clip-rule="evenodd" />\n        </svg>\n        <p id="errorBox" class="text-sm text-red-800">Error message will appear here</p>\n      </div>\n    </div>\n\n    <!-- Submit Button -->\n    <ui-button id="connectBtn" type="submit" data-type="solid" data-size="large">\n      <span id="loginBtnText">Connect to Monarch</span>\n      <svg id="loginSpinner" class="hidden animate-spin ml-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24">\n        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>\n        <path class="opacity-75" fill="currentColor"\n          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">\n        </path>\n      </svg>\n    </ui-button>\n  </form>\n\n  <!-- Security Note -->\n  <div class="flex items-start gap-3 mt-6 sm:mt-8 p-4 bg-green-50 border border-green-200 rounded-lg">\n    <div class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5">\n      <svg id="securityNoteIcon" viewBox="0 0 24 24" fill="currentColor">\n        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />\n        <path d="M9 12l2 2 4-4" stroke="white" stroke-width="2" fill="none" />\n      </svg>\n    </div>\n    <div>\n      <p id="securityNote" class="text-xs sm:text-sm text-green-800 leading-relaxed">\n        <strong>How we protect your data:</strong> Credentials are encrypted using AES-256-GCM before storage. We use the same security standards as major financial institutions. Monarch does not support OAuth, so credentials are stored client-side only.\n      </p>\n    </div>\n  </div>\n\n</div>\n\n<style>\n  input[type="password"]::-ms-reveal,\n  input[type="password"]::-ms-clear,\n  input[type="password"]::-webkit-credentials-auto-fill-button,\n  input[type="password"]::-webkit-inner-spin-button,\n  input[type="password"]::-webkit-clear-button {\n    display: none !important;\n    appearance: none;\n  }\n\n  input[type="password"]::-webkit-credentials-auto-fill-button {\n    display: none !important;\n    visibility: hidden;\n  }\n\n  #togglePassword,\n  #clearCredentialsBtn {\n    transition: none !important;\n    box-shadow: none !important;\n    transform: none !important;\n  }\n</style>';
 
   // src/views/MonarchOtp/monarchOtpData.js
-  function initCredentialsFromStorage(state2) {
-    const { credentials } = state2;
+  function initCredentialsFromStorage() {
     const email = sessionStorage.getItem("monarch_email");
     const encryptedPassword = sessionStorage.getItem("monarch_pwd_enc");
     const uuid = sessionStorage.getItem("monarch_uuid");
-    state2.setCredentials({
-      email: credentials.email || email,
-      encryptedPassword: credentials.encryptedPassword || encryptedPassword,
-      deviceUuid: credentials.deviceUuid || uuid,
-      remember: false
-    });
-    return { email, encryptedPassword, uuid };
+    state_default.monarchCredentials.email = email;
+    state_default.monarchCredentials.encryptedPassword = encryptedPassword;
+    state_default.monarchCredentials.uuid = uuid;
+    if (!state_default.monarchCredentials.uuid || state_default.monarchCredentials.uuid === "") {
+      state_default.monarchCredentials.uuid = v4_default();
+      sessionStorage.setItem("monarch_uuid", state_default.monarchCredentials.uuid);
+    }
+    return { creds: state_default.monarchCredentials };
   }
   async function submitOtp(credentials) {
-    const response = await monarchApi.login(credentials.email, credentials.encryptedPassword, credentials.deviceUuid, credentials.otp);
+    const response = await monarchApi.login(credentials.email, credentials.encryptedPassword, credentials.uuid, credentials.otp);
     if (response?.token) {
-      state_default.setCredentials({
-        apiToken: response.token,
-        awaitingOtp: false
-      });
-      sessionStorage.setItem("monarch_email", credentials.email);
-      sessionStorage.setItem("monarch_pwd_enc", credentials.encryptedPassword);
-      sessionStorage.setItem("monarch_uuid", credentials.deviceUuid);
+      state_default.monarchCredentials.accessToken = response.token;
       sessionStorage.setItem("monarch_token", response.token);
       return { success: true };
     }
@@ -10404,7 +10214,11 @@ Existing Account:`, this._accounts.get(account.id));
     sessionStorage.removeItem("monarch_pwd_enc");
     sessionStorage.removeItem("monarch_uuid");
     sessionStorage.removeItem("monarch_token");
-    sessionStorage.removeItem("monarch_otp");
+    state_default.monarchCredentials.email = null;
+    state_default.monarchCredentials.encryptedPassword = null;
+    state_default.monarchCredentials.uuid = v4_default();
+    state_default.monarchCredentials.otp = null;
+    sessionStorage.setItem("monarch_uuid", state_default.monarchCredentials.uuid);
   }
 
   // src/views/MonarchOtp/monarchOtp.js
@@ -10425,11 +10239,10 @@ Existing Account:`, this._accounts.get(account.id));
       otpInput: $("otpInput"),
       submitOtpBtn: $("submitOtpBtn"),
       otpError: $("otpError"),
-      backBtn: $("backBtn")
+      backBtn: $("navBackBtn")
     };
-    const { credentials } = state_default;
-    const { storage, tempForOtp } = initCredentialsFromStorage(state_default);
-    if (!credentials.email || !credentials.encryptedPassword) {
+    const { creds } = initCredentialsFromStorage();
+    if (!creds.email || !creds.encryptedPassword) {
       console.warn("Missing credentials for OTP flow, redirecting to login");
       return navigate("/credentials", true);
     }
@@ -10437,9 +10250,9 @@ Existing Account:`, this._accounts.get(account.id));
       console.group("MonarchOtpView");
       e.preventDefault();
       toggleElementVisibility(UI.otpError, false);
-      credentials.otp = UI.otpInput.value;
+      creds.otp = UI.otpInput.value;
       try {
-        const result = await submitOtp(credentials);
+        const result = await submitOtp(creds);
         if (result.success) {
           console.groupEnd("MonarchOtpView");
           return navigate("/complete", true);
@@ -11806,7 +11619,7 @@ Existing Account:`, this._accounts.get(account.id));
       const buttonContainer = document.createElement("div");
       buttonContainer.className = "flex justify-end gap-2";
       const confirmBtn = document.createElement("button");
-      confirmBtn.className = `px-4 py-2 rounded-md text-sm font-medium border transition-colors ${needsReview ? "bg-yellow-50 text-yellow-800 border-yellow-300 cursor-not-allowed" : isApproved ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"}`;
+      confirmBtn.className = `px-4 py-2 rounded-md text-sm font-medium border transition-colors ${needsReview ? "bg-yellow-50 text-yellow-800 border-yellow-300 cursor-not-allowed" : isApproved ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer" : "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer"}`;
       confirmBtn.textContent = needsReview ? "Needs Review" : isApproved ? "Modify" : "Approve";
       confirmBtn.disabled = needsReview;
       confirmBtn.addEventListener("click", async () => {
@@ -12393,7 +12206,7 @@ Existing Account:`, this._accounts.get(account.id));
       scroll: false,
       title: "Select Method - YNAB to Monarch",
       requiresAuth: false,
-      requiresAccounts: true,
+      requiresAccounts: false,
       layoutType: "document"
     },
     "/manual": {

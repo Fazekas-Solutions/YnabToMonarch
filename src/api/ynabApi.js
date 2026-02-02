@@ -1,6 +1,5 @@
 import { startYnabOauth, getExpectedState, clearExpectedState } from './ynabOauth.js';
 import { exchangeYnabToken, ynabApiCall } from './ynabTokens.js';
-import state from '../state.js';
 import Account from '../schemas/account.js';
 import Accounts from '../schemas/accounts.js';
 import Transaction from '../schemas/transaction.js';
@@ -33,10 +32,8 @@ export async function getAccounts() {
     if (response.error) {
       throw new Error(response.error.id, response.error.name, response.error.detail);
     }
-    console.warn("getAccounts response:", response);
 
     const accountData = response.data.accounts;
-    console.warn("getAccounts accountData:", accountData);
     const accountList = new Accounts();
     accountData.forEach(acc => {
       const account = new Account(acc['id']);
@@ -142,7 +139,6 @@ export async function handleOauthCallback() {
     throw new Error('Failed to exchange authorization code for tokens.');
   }
 
-  console.table(state);
   return 'success';
 }
 

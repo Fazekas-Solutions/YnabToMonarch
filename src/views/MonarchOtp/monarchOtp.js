@@ -1,5 +1,4 @@
 import { navigate, goBack } from '../../router.js';
-import state from '../../state.js';
 import {
   initCredentialsFromStorage,
   submitOtp,
@@ -26,14 +25,13 @@ export default function initMonarchOtpView() {
     otpInput: $('otpInput'),
     submitOtpBtn: $('submitOtpBtn'),
     otpError: $('otpError'),
-    backBtn: $('backBtn')
+    backBtn: $('navBackBtn')
   };
 
-  const { credentials } = state;
-  const { storage, tempForOtp } = initCredentialsFromStorage(state);
+  const { creds } = initCredentialsFromStorage();
 
   // Ensure we have the required credentials for OTP
-  if (!credentials.email || !credentials.encryptedPassword) {
+  if (!creds.email || !creds.encryptedPassword) {
     console.warn('Missing credentials for OTP flow, redirecting to login');
     return navigate('/credentials', true);
   }
@@ -43,10 +41,10 @@ export default function initMonarchOtpView() {
     e.preventDefault();
 
     toggleElementVisibility(UI.otpError, false);
-    credentials.otp = UI.otpInput.value;
+    creds.otp = UI.otpInput.value;
 
     try {
-      const result = await submitOtp(credentials);
+      const result = await submitOtp(creds);
       if (result.success) {
         console.groupEnd("MonarchOtpView");
         return navigate('/complete', true);

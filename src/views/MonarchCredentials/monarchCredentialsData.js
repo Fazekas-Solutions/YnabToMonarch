@@ -3,36 +3,57 @@ import { monarchApi } from '../../api/monarchApi.js';
 import { encryptPassword } from '../../../shared/crypto.js';
 import state from '../../state.js';
 
+/**
+ * Initialize credentials from storage based on STORAGE_STRATEGY:
+ * - sessionStorage: temporary, cleared on tab close
+ * - localStorage: persistent, encrypted, user-opted-in with "remember me"
+ */
 export function initCredentials() {
-  const creds = state.credentials;
+  // Try to load persisted credentials from localStorage (if user chose "remember me")
+  const persistedEmail = localStorage.getItem('monarch_email_persisted');
+  const persistedEncrypted = localStorage.getItem('monarch_pwd_enc_persisted');
+  const persistedRemember = localStorage.getItem('monarch_remember') === 'true';
   
-  // Load from sessionStorage (new storage strategy)
-  const email = sessionStorage.getItem('monarch_email');
-  const encryptedPassword = sessionStorage.getItem('monarch_pwd_enc');
-  const token = sessionStorage.getItem('monarch_token');
-  const uuid = sessionStorage.getItem('monarch_uuid');
+  // Try to load session credentials from sessionStorage (temporary)
+  const sessionEmail = sessionStorage.getItem('monarch_email');
+  const sessionEncrypted = sessionStorage.getItem('monarch_pwd_enc');
+  const sessionToken = sessionStorage.getItem('monarch_token');
+  const sessionUuid = sessionStorage.getItem('monarch_uuid');
   
-  state.setCredentials({
-    email: creds.email || email,
-    encryptedPassword: creds.encryptedPassword || encryptedPassword,
-    apiToken: creds.apiToken || token,
-    deviceUuid: creds.deviceUuid || uuid,
-    remember: false // No longer persisting across sessions
-  });
+  // Prioritize persisted credentials if available, otherwise use session credentials
+  const email = persistedEmail || sessionEmail;
+  const encryptedPassword = persistedEncrypted || sessionEncrypted;
+  const token = sessionToken;
+  const uuid = sessionUuid;
+  const isRemembered = persistedRemember;
+  
+  // Update state with loaded credentials
+  state.monarchCredentials.email = email;
+  state.monarchCredentials.encryptedPassword = encryptedPassword;
+  state.monarchCredentials.accessToken = token;
+  state.monarchCredentials.uuid = uuid;
+  state.monarchCredentials.remember = isRemembered;
 
-  if (!creds.deviceUuid || creds.deviceUuid === '') {
-    creds.deviceUuid = uuidv4();
-    sessionStorage.setItem('monarch_uuid', creds.deviceUuid);
+  // Ensure deviceUuid is always set
+  if (!state.monarchCredentials.uuid || state.monarchCredentials.uuid === '') {
+    state.monarchCredentials.uuid = uuidv4();
+    sessionStorage.setItem('monarch_uuid', state.monarchCredentials.uuid);
   }
 
-  return { creds };
+  return { creds: state.monarchCredentials };
 }
 
-export async function attemptLogin({ emailInput, passwordInput, creds, UI }) {
-  const email = emailInput.trim() || sessionStorage.getItem('monarch_email');
+/**
+ * Attempt login and handle credential storage based on user's "remember me" choice.
+ * STORAGE_STRATEGY:
+ * - If "remember me" is unchecked: store temporarily in sessionStorage (cleared on tab close)
+ * - If "remember me" is checked: store encrypted in localStorage (persistent)
+ */
+export async function attemptLogin({ emailInput, passwordInput, creds, rememberChecked }) {
+  const email = emailInput.trim();
   const plaintextPassword = passwordInput.trim();
-  let encryptedPassword = creds.encryptedPassword || sessionStorage.getItem('monarch_pwd_enc');
-  const uuid = creds.deviceUuid || sessionStorage.getItem('monarch_uuid');
+  let encryptedPassword = creds.encryptedPassword;
+  const uuid = creds.uuid;
 
   if (!encryptedPassword && plaintextPassword) {
     try {
@@ -46,30 +67,24 @@ export async function attemptLogin({ emailInput, passwordInput, creds, UI }) {
     const response = await monarchApi.login(email, encryptedPassword, uuid);
 
     if (response?.otpRequired) {
-      state.saveToLocalStorage({
-        email,
-        encryptedPassword,
-        uuid,
-        remember: creds.remember,
-        tempForOtp: !creds.remember
-      });
-
-      state.setCredentials({ awaitingOtp: true });
+      // Store temporarily for OTP verification
+      storeCredentialsTemporarily(email, encryptedPassword);
+      state.monarchCredentials.otp = null; // awaiting OTP
       return { otpRequired: true };
     }
 
     if (response?.token) {
-      state.setCredentials({
-        email,
-        encryptedPassword,
-        otp: '',
-        remember: UI.rememberCheckbox.checked,
-        apiToken: response.token,
-        awaitingOtp: false
-      });
+      state.monarchCredentials.email = email;
+      state.monarchCredentials.encryptedPassword = encryptedPassword;
+      state.monarchCredentials.accessToken = response.token;
+      state.monarchCredentials.remember = rememberChecked;
+      state.monarchCredentials.otp = '';
 
-      if (creds.remember) {
-        state.saveToLocalStorage({ email, encryptedPassword, token: response.token, remember: true });
+      // Store credentials based on user preference
+      if (rememberChecked) {
+        storeCredentialsPersistently(email, encryptedPassword);
+      } else {
+        storeCredentialsTemporarily(email, encryptedPassword);
       }
 
       return { token: response.token };
@@ -82,10 +97,55 @@ export async function attemptLogin({ emailInput, passwordInput, creds, UI }) {
   }
 }
 
-export function clearCredentialsAndReset() {
-  state.clearLocalStorage();
-  state.credentials.clear();
+/**
+ * Store credentials in sessionStorage (temporary, cleared on tab close).
+ * Per STORAGE_STRATEGY section 3.
+ */
+function storeCredentialsTemporarily(email, encryptedPassword) {
+  sessionStorage.setItem('monarch_email', email);
+  sessionStorage.setItem('monarch_pwd_enc', encryptedPassword);
+  // Clear any persisted credentials
+  localStorage.removeItem('monarch_email_persisted');
+  localStorage.removeItem('monarch_pwd_enc_persisted');
+  localStorage.removeItem('monarch_remember');
+}
 
-  state.credentials.deviceUuid = uuidv4();
-  state.saveToLocalStorage({ uuid: state.credentials.deviceUuid });
+/**
+ * Store credentials in localStorage (persistent, encrypted, user-opted-in).
+ * Per STORAGE_STRATEGY section 4.
+ */
+function storeCredentialsPersistently(email, encryptedPassword) {
+  localStorage.setItem('monarch_email_persisted', email);
+  localStorage.setItem('monarch_pwd_enc_persisted', encryptedPassword);
+  localStorage.setItem('monarch_remember', 'true');
+  // Also populate sessionStorage for current session
+  sessionStorage.setItem('monarch_email', email);
+  sessionStorage.setItem('monarch_pwd_enc', encryptedPassword);
+}
+
+/**
+ * Clear all stored credentials (both session and persistent).
+ * Per STORAGE_STRATEGY: user explicitly chose to "Not You?" to clear saved data.
+ */
+export function clearCredentialsAndReset() {
+  // Clear sessionStorage credentials
+  sessionStorage.removeItem('monarch_email');
+  sessionStorage.removeItem('monarch_pwd_enc');
+  sessionStorage.removeItem('monarch_token');
+  
+  // Clear localStorage persisted credentials
+  localStorage.removeItem('monarch_email_persisted');
+  localStorage.removeItem('monarch_pwd_enc_persisted');
+  localStorage.removeItem('monarch_remember');
+  
+  // Reset state
+  state.monarchCredentials.email = null;
+  state.monarchCredentials.encryptedPassword = null;
+  state.monarchCredentials.accessToken = null;
+  state.monarchCredentials.otp = null;
+  state.monarchCredentials.remember = false;
+  
+  // Generate new device UUID
+  state.monarchCredentials.uuid = uuidv4();
+  sessionStorage.setItem('monarch_uuid', state.monarchCredentials.uuid);
 }

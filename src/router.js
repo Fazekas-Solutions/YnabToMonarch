@@ -73,7 +73,7 @@ const routes = {
     scroll: false,
     title: 'Select Method - YNAB to Monarch',
     requiresAuth: false,
-    requiresAccounts: true,
+    requiresAccounts: false,
     layoutType: 'document'
   },
   '/manual': {

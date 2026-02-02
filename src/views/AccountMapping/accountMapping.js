@@ -2,7 +2,6 @@ import Accounts from '../../schemas/accounts.js';
 import { renderPageLayout } from '../../components/pageLayout.js';
 import { navigate } from '../../router.js';
 import monarchAccountTypes from '../../../public/static-data/monarchAccountTypes.json';
-import { getAccountTypeByName } from '../../utils/accountTypeUtils.js';
 import { AccountType as YnabAccountType } from '../../utils/enumYnabAccountType.js';
 
 const normalize = (value) => String(value || '').toLowerCase();
@@ -550,12 +549,11 @@ export default async function initAccountMappingView() {
     buttonContainer.className = 'flex justify-end gap-2';
 
     const confirmBtn = document.createElement('button');
-    // TODO: Remove hover effect when needsReview.
     confirmBtn.className = `px-4 py-2 rounded-md text-sm font-medium border transition-colors ${needsReview
       ? 'bg-yellow-50 text-yellow-800 border-yellow-300 cursor-not-allowed'
       : isApproved
-        ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100'
-        : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
+        ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 cursor-pointer'
+        : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 cursor-pointer'
       }`;
     confirmBtn.textContent = needsReview ? 'Needs Review' : (isApproved ? 'Modify' : 'Approve');
     confirmBtn.disabled = needsReview;

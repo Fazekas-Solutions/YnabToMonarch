@@ -108,12 +108,6 @@ class FinancialDataDB {
           console.log('Created "uploadStates" object store');
         }
 
-        // Create metadata store for app state
-        if (!db.objectStoreNames.contains('metadata')) {
-          db.createObjectStore('metadata', { keyPath: 'key' });
-          console.log('Created "metadata" object store');
-        }
-
         console.groupEnd();
       };
     });
@@ -139,7 +133,7 @@ class FinancialDataDB {
       return;
     }
 
-    console.log(`Saving ${accountsData.accounts.length} accounts to IndexedDB`);
+    console.log(`Saving ${accountsData.accounts.length} accounts to IndexedDB...`);
 
     return new Promise((resolve, reject) => {
       const tx = this.db.transaction(['accounts', 'transactions'], 'readwrite');
@@ -437,7 +431,7 @@ class FinancialDataDB {
     return new Promise((resolve, reject) => {
       // Serialize the account
       const accountData = account.toObject ? account.toObject() : (account.toJSON ? account.toJSON() : account);
-      
+
       const putRequest = accountStore.put(accountData);
 
       putRequest.onsuccess = () => {
@@ -673,71 +667,6 @@ class FinancialDataDB {
         console.error('Error clearing upload states:', tx.error);
         console.groupEnd();
         reject(tx.error);
-      };
-    });
-  }
-
-  /**
-   * Save metadata (app state, settings, etc.)
-   * @param {string} key
-   * @param {any} value
-   * @returns {Promise<void>}
-   */
-  async saveMetadata(key, value) {
-    console.group('saveMetadata:');
-    if (!isIndexedDBAvailable || !this.db) {
-      console.warn('IndexedDB not initialized, skipping metadata save');
-      console.groupEnd();
-      return;
-    }
-
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('metadata', 'readwrite');
-      const store = tx.objectStore('metadata');
-      const request = store.put({ key, value, timestamp: Date.now() });
-
-      request.onsuccess = () => {
-        console.log(`✅ Metadata for key "${key}" saved`);
-        console.groupEnd();
-        resolve();
-      }
-      request.onerror = () => {
-        console.error('Error saving metadata:', request.error);
-        console.groupEnd();
-        reject(request.error);
-      };
-    });
-  }
-
-  /**
-   * Get metadata by key
-   * @param {string} key
-   * @returns {Promise<any|null>}
-   */
-  async getMetadata(key) {
-    console.group('getMetadata:');
-    if (!isIndexedDBAvailable || !this.db) {
-      console.warn('IndexedDB not initialized, returning null');
-      console.groupEnd();
-      return null;
-    }
-
-    return new Promise((resolve, reject) => {
-      const tx = this.db.transaction('metadata', 'readonly');
-      const store = tx.objectStore('metadata');
-      const request = store.get(key);
-
-      request.onsuccess = () => {
-        const result = request.result;
-        console.log(`✅ Retrieved metadata for key "${key}":`, result);
-        console.groupEnd();
-        resolve(result ? result.value : null);
-      };
-
-      request.onerror = () => {
-        console.error('Error retrieving metadata:', request.error);
-        console.groupEnd();
-        resolve(null);
       };
     });
   }
