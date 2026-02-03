@@ -12,9 +12,12 @@ import {
   markUnprocessedAsFailed,
   handleCreateResponse
 } from './monarchCompleteData.js';
+import Accounts from '../../schemas/accounts.js';
 
-function initMonarchCompleteView() {
+// TODO: Replace state with IndexedDB, and call monarchApi.getAccounts to ensure the user's
+// Monarch subscription is not expired.
 
+export default async function initMonarchCompleteView() {
   renderPageLayout({
     navbar: {
       showBackButton: true,
@@ -25,6 +28,9 @@ function initMonarchCompleteView() {
       containerId: 'pageHeader'
     }
   });
+
+  const accounts = new Accounts();
+  await accounts.loadFromDb();
 
   // Get template elements
   const resultsContainer = document.getElementById('resultsContainer');
@@ -52,7 +58,7 @@ function initMonarchCompleteView() {
 
   function initializeProcessing() {
     // Set initial status for all accounts
-    ensurePendingStatusForAccounts(state);
+    ensurePendingStatusForAccounts();
 
     // Show initial state
     updateStatusOverview();
@@ -372,5 +378,3 @@ function initMonarchCompleteView() {
     processAccountsInBatches();
   }
 }
-
-export default initMonarchCompleteView;
