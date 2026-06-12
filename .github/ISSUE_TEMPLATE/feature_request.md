@@ -1,9 +1,11 @@
 ---
 name: Feature request
-about: Suggest an idea or improvement for the YNAB to Monarch migration tool
-title: "[Feature]: "
+about: Suggest an idea for this project
+title: ''
 labels: enhancement
-assignees: ''
+assignees: DFazekas
+type: Feature
+
 ---
 
 ## What problem does this solve?
@@ -30,16 +32,7 @@ Which part of the migration does this touch? (Check all that apply.)
 - [ ] The completion / thank-you experience
 - [ ] Something else (describe below)
 
-## Alternatives you've considered
-
-Any other approaches or workarounds you've thought about or are using today.
-
 ## Additional context
 
 Screenshots, mockups, links, or anything else that helps explain the request.
 If it's relevant, roughly how many accounts/transactions you were migrating.
-
-## Checklist
-
-- [ ] I searched existing issues and this hasn't already been requested
-- [ ] This is a feature request (use the bug report flow for things that are broken)
