@@ -1,0 +1,21 @@
+<div class="container-responsive py-4 sm:py-6 md:py-8">
+  <div class="w-full">
+
+    <!-- Step indicator (sits above the reusable step header) -->
+    <div id="mappingStepper" class="flex items-center justify-center gap-2 sm:gap-3 mb-6"></div>
+
+    <!-- Reusable step header (back + title + subtitle), injected per step by JS -->
+    <div id="mappingHeader"></div>
+
+    <!-- Step content (rendered per step by JS) -->
+    <div id="mappingContent"></div>
+
+  </div>
+
+  <!-- Navigation bar (Back / Continue), injected per step -->
+  <div id="mappingNav"></div>
+
+  <!-- Floating bulk action bar; shown when rows are selected on a step. -->
+  <div id="mappingBulkBar"
+       class="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 translate-y-3 opacity-0 pointer-events-none transition-all duration-300 w-[calc(100vw-1.5rem)] sm:w-auto sm:max-w-2xl"></div>
+</div>

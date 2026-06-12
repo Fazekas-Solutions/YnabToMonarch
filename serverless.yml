@@ -24,6 +24,12 @@ functions:
       - http:
           path: fetchMonarchAccounts
           method: post
+  fetchMappingOptions:
+    handler: netlify/functions/fetchMonarchMappingOptions.handler
+    events:
+      - http:
+          path: fetchMonarchMappingOptions
+          method: post
   createAccounts:
     handler: netlify/functions/createMonarchAccounts.handler
     timeout: 30

@@ -2,7 +2,7 @@ import { navigate, goBack } from '../../router.js';
 import state from '../../state.js';
 import { monarchApi } from '../../api/monarchApi.js';
 import { renderButtons } from '../../components/button.js';
-import { createSimpleNavigationBar } from '../../utils/navigationBar.js';
+import { createStepHeader } from '../../utils/navigationBar.js';
 import {
   saveToLocalStorage, getLocalStorage, clearStorage
 } from '../../utils/storage.js';
@@ -10,10 +10,11 @@ import { toggleDisabled, toggleElementVisibility } from '../../utils/dom.js';
 import { patchState } from '../../utils/state.js';
 
 export default function initMonarchOtpView() {
-  // Add navigation bar at the bottom of the content
-  const mainContainer = document.querySelector('.container-responsive');
-  mainContainer.insertAdjacentHTML('beforeend', createSimpleNavigationBar({
-    backText: "Back"
+  // Full-width step header (shared component).
+  document.querySelector('.container-responsive').insertAdjacentHTML('afterbegin', createStepHeader({
+    title: "Enter your verification code",
+    subtitle: "Monarch emailed you a 6-digit code. Enter it below to finish connecting.",
+    backText: "Back to Login"
   }));
 
   const $ = (id) => document.getElementById(id);
@@ -85,7 +86,7 @@ export default function initMonarchOtpView() {
         }
 
         console.groupEnd("MonarchOtpView");
-        return navigate('/complete');
+        return navigate('/mapping');
       }
 
       throw new Error('Unknown login response.');

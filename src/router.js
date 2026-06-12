@@ -13,17 +13,29 @@ import methodTemplate from './views/MethodSelect/method.html';
 import initManualInstructionsView from './views/ManualInstructions/manualInstructions.js';
 import manualInstructionsTemplate from './views/ManualInstructions/manualInstructions.html';
 
+import initCustomizeAccountsView from './views/CustomizeAccounts/customizeAccounts.js';
+import customizeAccountsTemplate from './views/CustomizeAccounts/customizeAccounts.html';
+
 import initMonarchCredentialsView from './views/MonarchCredentials/monarchCredentials.js';
 import monarchCredentialsTemplate from './views/MonarchCredentials/monarchCredentials.html';
 
 import initMonarchOtpView from './views/MonarchOtp/monarchOtp.js';
 import monarchOtpTemplate from './views/MonarchOtp/monarchOtp.html';
 
+import initMonarchMappingView from './views/MonarchMapping/monarchMapping.js';
+import monarchMappingTemplate from './views/MonarchMapping/monarchMapping.html';
+
 import initMonarchCompleteView from './views/MonarchComplete/monarchComplete.js';
 import monarchCompleteTemplate from './views/MonarchComplete/monarchComplete.html';
 
+import initThankYouView from './views/ThankYou/thankYou.js';
+import thankYouTemplate from './views/ThankYou/thankYou.html';
+
 import initYnabOauthCallbackView from './views/YnabOauthCallback/ynabOauthCallback.js';
 import ynabOauthCallbackTemplate from './views/YnabOauthCallback/ynabOauthCallback.html';
+
+import initSyncedAccountsView from './views/SyncedAccounts/syncedAccounts.js';
+import syncedAccountsTemplate from './views/SyncedAccounts/syncedAccounts.html';
 
 import state from './state.js';
 import { getLocalStorage } from './utils/storage.js';
@@ -59,10 +71,18 @@ const routes = {
     requiresAuth: false,
     requiresAccounts: true
   },
-  '/manual': { 
-    template: manualInstructionsTemplate, 
-    init: initManualInstructionsView, 
-    scroll: true, 
+  '/customize': {
+    template: customizeAccountsTemplate,
+    init: initCustomizeAccountsView,
+    scroll: true,
+    title: 'Name Your Accounts - YNAB to Monarch',
+    requiresAuth: false,
+    requiresAccounts: true
+  },
+  '/manual': {
+    template: manualInstructionsTemplate,
+    init: initManualInstructionsView,
+    scroll: true,
     title: 'Manual Import - YNAB to Monarch',
     requiresAuth: false,
     requiresAccounts: true
@@ -83,11 +103,27 @@ const routes = {
     requiresAuth: false,
     requiresAccounts: true
   },
-  '/complete': { 
-    template: monarchCompleteTemplate, 
-    init: initMonarchCompleteView, 
-    scroll: false, 
+  '/mapping': {
+    template: monarchMappingTemplate,
+    init: initMonarchMappingView,
+    scroll: true,
+    title: 'Map Categories & Tags - YNAB to Monarch',
+    requiresAuth: false,
+    requiresAccounts: true
+  },
+  '/complete': {
+    template: monarchCompleteTemplate,
+    init: initMonarchCompleteView,
+    scroll: true,
     title: 'Migration Complete - YNAB to Monarch',
+    requiresAuth: false,
+    requiresAccounts: true
+  },
+  '/thank-you': {
+    template: thankYouTemplate,
+    init: initThankYouView,
+    scroll: true,
+    title: 'Thank You - YNAB to Monarch',
     requiresAuth: false,
     requiresAccounts: true
   },
@@ -96,6 +132,13 @@ const routes = {
     init: initYnabOauthCallbackView,
     scroll: false,
     title: 'Authorize YNAB - YNAB to Monarch',
+    requiresAuth: false
+  },
+  '/synced-accounts': {
+    template: syncedAccountsTemplate,
+    init: initSyncedAccountsView,
+    scroll: true,
+    title: 'Creating Synced Accounts - YNAB to Monarch',
     requiresAuth: false
   }
 };
@@ -178,6 +221,10 @@ async function renderRoute(path) {
   // Clear and inject HTML template
   app.innerHTML = '';
   app.innerHTML = route.template;
+
+  // Each route should start at the top — without this the previous page's
+  // scroll offset carries over into the freshly rendered one.
+  window.scrollTo(0, 0);
 
   // Initialize view logic
   try {
@@ -324,15 +371,23 @@ export function goBack() {
   
   const backRoutes = {
     '/review': '/upload',
-    '/method': '/review', 
-    '/manual': '/method',
+    '/method': '/review',
+    '/customize': '/method',
+    '/manual': '/customize',
     '/login': '/method',
     '/otp': '/login',
-    '/complete': '/review'
+    '/mapping': '/login',
+    '/complete': '/mapping'
   };
   
   const backPath = backRoutes[currentPath] || '/upload';
   navigate(backPath);
+}
+
+// Take over scroll handling from the browser; otherwise it restores the prior
+// scroll offset on back/forward, overriding our reset-to-top in renderRoute.
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
 }
 
 // Handle browser back/forward buttons

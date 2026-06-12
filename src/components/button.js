@@ -58,11 +58,11 @@ export function renderButtons() {
     // Apply responsive type styles
     switch (type) {
       case 'primary':
-        button.classList.add('bg-[#1993e5]', 'text-white', 'border', 'border-[#1993e5]', 'shadow-sm');
+        button.classList.add('bg-blue-500', 'text-white', 'border', 'border-blue-500', 'shadow-sm');
         if (!isDisabled) {
-          button.classList.add('hover:bg-blue-600', 'hover:border-blue-600', 'hover:shadow-md', 
-                              'focus:ring-2', 'focus:ring-blue-500', 'focus:ring-offset-2', 
-                              'active:bg-blue-700', 'transform', 'hover:scale-105');
+          button.classList.add('hover:bg-blue-600', 'hover:border-blue-600',
+                              'focus:ring-2', 'focus:ring-blue-500', 'focus:ring-offset-2',
+                              'active:bg-blue-700');
         }
         break;
       case 'secondary':
@@ -88,17 +88,17 @@ export function renderButtons() {
       case 'danger':
         button.classList.add('bg-red-500', 'text-white', 'border', 'border-red-500', 'shadow-sm');
         if (!isDisabled) {
-          button.classList.add('hover:bg-red-600', 'hover:border-red-600', 'hover:shadow-md',
+          button.classList.add('hover:bg-red-600', 'hover:border-red-600',
                               'focus:ring-2', 'focus:ring-red-500', 'focus:ring-offset-2',
-                              'active:bg-red-700', 'transform', 'hover:scale-105');
+                              'active:bg-red-700');
         }
         break;
       case 'warning':
         button.classList.add('bg-orange-500', 'text-white', 'border', 'border-orange-500', 'shadow-sm');
         if (!isDisabled) {
-          button.classList.add('hover:bg-orange-600', 'hover:border-orange-600', 'hover:shadow-md',
+          button.classList.add('hover:bg-orange-600', 'hover:border-orange-600',
                               'focus:ring-2', 'focus:ring-orange-500', 'focus:ring-offset-2',
-                              'active:bg-orange-700', 'transform', 'hover:scale-105');
+                              'active:bg-orange-700');
         }
         break;
     }

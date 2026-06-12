@@ -15,22 +15,29 @@
 <body class="bg-white text-[#111518] font-inter min-h-screen flex flex-col">
 
   <!-- App Header -->
-    <!-- App Header -->
   <header class="border-b border-[#f0f3f4] py-3 sm:py-4 md:py-5 px-3 sm:px-6 lg:px-8 bg-white sticky top-0 z-40">
     <div class="flex items-center justify-between max-w-7xl mx-auto">
-      <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+      <a href="/" id="header-home-link" aria-label="YNAB to Monarch Money — go to home"
+         class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
         <div class="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-[#005B96] flex-shrink-0">
           <svg viewBox="0 0 48 48" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" />
           </svg>
         </div>
-        <h1 class="font-bold text-sm sm:text-base md:text-lg truncate">YNAB to Monarch Money</h1>
-      </div>
-      <a href="https://buymeacoffee.com/fazekasdevh" target="_blank" rel="noopener noreferrer" 
-         class="flex-shrink-0 hidden xs:block">
-        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" 
-             alt="Buy Me A Coffee" 
-             class="h-7 sm:h-8 md:h-10 w-auto">
+        <h1 class="font-bold text-sm sm:text-base md:text-lg truncate hidden sm:block">YNAB to Monarch Money</h1>
+      </a>
+      <!-- Donation button, floated right (ml-auto), always visible.
+           BMC's official button.prod.min.js renders via document.writeln(), which
+           only injects during initial parse and is commonly ad-blocked — so it
+           shows nothing embedded like this. This <img> is the SAME button with the
+           identical settings, rendered by BMC server-side. The width/height attrs
+           define the aspect ratio so `w-auto` can never collapse to zero width. -->
+      <a href="https://buymeacoffee.com/fazekasdevh" target="_blank" rel="noopener noreferrer"
+         class="flex-shrink-0 ml-auto block">
+        <img src="https://img.buymeacoffee.com/button-api/?text=Support%20this%20tool&emoji=%E2%9D%A4%EF%B8%8F&slug=fazekasdevh&button_colour=FFDD00&font_colour=000000&font_family=Poppins&outline_colour=000000&coffee_colour=ffffff"
+             alt="Support this tool on Buy Me a Coffee"
+             width="253" height="50"
+             class="h-8 sm:h-10 w-auto">
       </a>
     </div>
   </header>

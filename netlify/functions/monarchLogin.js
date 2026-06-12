@@ -1,5 +1,6 @@
 import fetch from 'node-fetch';
 import { decryptPassword } from '../../shared/crypto-node.js';
+import { restHeaders } from '../../shared/monarchHeaders.js';
 
 export async function handler(event, context) {
   console.group("monarchLogin");
@@ -29,16 +30,10 @@ export async function handler(event, context) {
       ...(otp && { email_otp: otp }) // include OTP if present
     };
 
-    const headers = {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'client-platform': 'web',
-      'device-uuid': deviceUuid,
-      'monarch-client': 'monarch-core-web-app-rest',
-      'monarch-client-version': 'v1.0.1079',
-      'origin': 'https://app.monarch.com',
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36',
-    }
+    const headers = restHeaders({
+      deviceUuid,
+      extra: { 'Content-Type': 'application/json' }
+    })
 
     const response = await fetch('https://api.monarch.com/auth/login/', {
       method: 'POST',

@@ -1,8 +1,6 @@
 import { navigate, goBack } from '../../router.js';
 import state from '../../state.js';
-import { renderButtons } from '../../components/button.js';
-import { updateNavigationTexts } from '../../utils/navigation.js';
-import { createSimpleNavigationBar } from '../../utils/navigationBar.js';
+import { createStepHeader } from '../../utils/navigationBar.js';
 
 export default function initMethodSelectView() {
   // Redirect to upload if no accounts are available
@@ -11,36 +9,22 @@ export default function initMethodSelectView() {
     return;
   }
 
-  // Add navigation bar at the bottom of the content
-  const mainContainer = document.querySelector('.container-responsive');
-  mainContainer.insertAdjacentHTML('beforeend', createSimpleNavigationBar({
-    backText: "Back"
+  // Full-width step header (shared component).
+  document.querySelector('.container-responsive').insertAdjacentHTML('afterbegin', createStepHeader({
+    title: "How do you want to import?",
+    subtitle: "There are two ways to move your accounts into Monarch. Pick whichever suits how you like to work.",
+    backText: "Back to Review"
   }));
 
-  renderButtons();
-  updateNavigationTexts();
   const manualBtn = document.getElementById('manualImportBtn');
   const autoBtn = document.getElementById('autoImportBtn');
   const backBtn = document.getElementById('backBtn');
 
-  const totalCount = Object.keys(state.accounts).length;
+  // How many accounts the user chose to bring over — surfaced in the manual card.
   const selectedCount = Object.values(state.accounts).filter(acc => acc.included).length;
-
-  // Set text content
-  document.getElementById('totalCountDisplay').textContent = totalCount;
-  document.getElementById('filesCountDisplay').textContent = selectedCount;
   document.getElementById('manualFileCount').textContent = selectedCount;
 
-  manualBtn.addEventListener('click', () => {
-    navigate('/manual');
-  });
-
-  autoBtn.addEventListener('click', () => {
-    navigate('/login');
-  });
-
-  // Handle back navigation
-  backBtn.addEventListener('click', () => {
-    goBack();
-  });
+  manualBtn.addEventListener('click', () => navigate('/customize'));
+  autoBtn.addEventListener('click', () => navigate('/login'));
+  backBtn.addEventListener('click', () => goBack());
 }
