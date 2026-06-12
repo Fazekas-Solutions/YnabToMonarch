@@ -1,156 +1,452 @@
-<div class="min-h-screen">
-  <main class="container mx-auto px-4 py-8 md:py-16 max-w-6xl">
-    <section class="text-center mb-12 md:mb-16">
-      <div class="inline-flex items-center justify-center gap-2 mb-6">
-        <h1 class="text-3xl font-bold text-slate-900">YNAB to Monarch Migration</h1>
-      </div>
+<div class="w-full text-gray-900 -mt-4 sm:-mt-6 md:-mt-8 lg:-mt-12">
 
-      <p class="text-gray-600 max-w-2xl mx-auto mb-8">
-        Moving your financial data from YNAB to Monarch made simple and secure. Choose the method that works best for
-        you, and we'll guide you through each step.
+  <!-- ============================ HERO ============================ -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#005B96]/5 via-white to-white pointer-events-none"></div>
+    <div class="relative max-w-7xl mx-auto px-6 pt-44 pb-16 sm:pt-40 sm:pb-12 text-center">
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.05] max-w-4xl mx-auto">
+        Move your whole YNAB history into Monarch, in one pass.
+      </h1>
+      <p class="mt-5 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+        Every account, every transaction, every balance, mapped and imported together. Not one account at a time.
       </p>
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <button class="js-start ui-button" data-type="primary" data-size="large">Start migrating, it's free</button>
+      </div>
+      <p class="mt-4 text-xs text-gray-500">No account needed to start · Your data never leaves your browser</p>
+    </div>
+  </section>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 max-w-3xl mx-auto mb-8 text-left">
-        <div class="flex items-start gap-4">
-          <div class="bg-green-100 rounded-full p-3 shrink-0">
-            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M12 3c4.97 0 9 4.03 9 9s-4.03 9-9 9-9-4.03-9-9 4.03-9 9-9z" stroke-linecap="round"
-                stroke-linejoin="round"></path>
-              <path d="M8.5 12.5l1.5 1.5 4-4" stroke-linecap="round" stroke-linejoin="round"></path>
+  <!-- ===================== FEATURE: BULK ===================== -->
+  <section class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">Bulk import</p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Import every account at once</h2>
+        <p class="mt-4 text-gray-600 text-lg">Monarch makes you import one account at a time. Bring them all in together
+          and let them finish in parallel.</p>
+      </div>
+      <!-- Hero graphic: bulk import in progress -->
+      <div class="w-full max-w-3xl mx-auto">
+        <div class="rounded-2xl border border-gray-200 bg-white shadow-2xl overflow-hidden text-left">
+          <div class="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <span class="w-3 h-3 rounded-full bg-red-400"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+            <span class="w-3 h-3 rounded-full bg-green-400"></span>
+          </div>
+          <div class="p-4 sm:p-6 space-y-2">
+            <!-- account rows -->
+            <div class="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5">
+              <span class="text-lg">🛒</span>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">Everyday Chequing</div>
+                <div class="text-xs text-gray-400">1,204 transactions</div>
+              </div>
+              <span class="text-xs font-medium text-green-600 inline-flex items-center gap-1">✓ Done</span>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5">
+              <span class="text-lg">💳</span>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">Amex Cobalt</div>
+                <div class="text-xs text-gray-400">3,981 transactions</div>
+              </div>
+              <span class="text-xs font-medium text-green-600 inline-flex items-center gap-1">✓ Done</span>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg border border-[#005B96]/30 bg-[#005B96]/5 px-3 py-2.5">
+              <span class="text-lg">🏦</span>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">High-Interest Savings</div>
+                <div class="text-xs text-gray-400">2,531 transactions</div>
+              </div>
+              <span class="w-4 h-4 border-2 border-[#005B96]/30 border-t-[#005B96] rounded-full animate-spin"></span>
+            </div>
+            <div class="flex items-center gap-3 rounded-lg border border-gray-100 px-3 py-2.5 opacity-60">
+              <span class="text-lg">📈</span>
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm">Brokerage</div>
+                <div class="text-xs text-gray-400">9,426 transactions</div>
+              </div>
+              <span class="text-xs text-gray-400">Pending</span>
+            </div>
+            <div class="pt-1 text-xs text-gray-400 text-center">+ 10 more accounts</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FEATURE: MAPPING ===================== -->
+  <section class="bg-gray-50 border-y border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div class="lg:order-2">
+          <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">Account mapping</p>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Create new, or merge into existing</h2>
+          <p class="mt-4 text-gray-600 text-lg">Point each YNAB account at a brand-new Monarch account or one you
+            already have. You decide, account by account.</p>
+        </div>
+        <div class="lg:order-1 rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
+          <div class="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <span class="w-3 h-3 rounded-full bg-red-400"></span><span
+              class="w-3 h-3 rounded-full bg-yellow-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span>
+          </div>
+          <div class="p-5 space-y-3">
+            <div class="flex items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm truncate">Everyday Chequing</div>
+                <div class="text-xs text-gray-400">1,204 transactions</div>
+              </div>
+              <div
+                class="w-44 flex-shrink-0 flex items-center justify-between rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                <span class="truncate">➕ Create new</span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm truncate">Amex Cobalt</div>
+                <div class="text-xs text-gray-400">3,981 transactions</div>
+              </div>
+              <div
+                class="w-44 flex-shrink-0 flex items-center justify-between rounded-lg border border-[#005B96]/40 ring-2 ring-[#005B96]/10 px-3 py-2 text-sm">
+                <span class="truncate">💳 Amex (existing)</span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="font-medium text-sm truncate">Brokerage</div>
+                <div class="text-xs text-gray-400">512 transactions</div>
+              </div>
+              <div
+                class="w-44 flex-shrink-0 flex items-center justify-between rounded-lg border border-gray-300 px-3 py-2 text-sm">
+                <span class="truncate">➕ Create new</span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== FEATURE: TRANSACTIONS + BALANCE ============== -->
+  <section class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">One unified import</p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Transactions <span class="text-[#005B96]">and</span>
+          balance history, together</h2>
+        <p class="mt-4 text-gray-600 text-lg">Monarch splits these into two separate imports. We bring both across in a
+          single flow.</p>
+      </div>
+      <div class="rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
+        <div class="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
+          <span class="w-3 h-3 rounded-full bg-red-400"></span><span
+            class="w-3 h-3 rounded-full bg-yellow-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span>
+        </div>
+        <div class="p-5 grid grid-cols-2 gap-4">
+          <div class="rounded-xl border border-gray-100 p-4">
+            <div class="text-xs text-gray-400 mb-1">Transactions</div>
+            <div class="text-2xl font-bold">1,204</div>
+            <div class="mt-3 space-y-1.5">
+              <div class="h-2 rounded bg-gray-100"></div>
+              <div class="h-2 rounded bg-gray-100 w-5/6"></div>
+              <div class="h-2 rounded bg-gray-100 w-4/6"></div>
+            </div>
+          </div>
+          <div class="rounded-xl border border-gray-100 p-4">
+            <div class="text-xs text-gray-400 mb-1">Balance history</div>
+            <div class="text-2xl font-bold">5 yrs</div>
+            <svg viewBox="0 0 120 48" class="mt-3 w-full h-12" fill="none">
+              <polyline points="0,40 20,34 40,36 60,24 80,26 100,12 120,8" stroke="#005B96" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <polyline points="0,48 0,40 20,34 40,36 60,24 80,26 100,12 120,8 120,48" fill="#005B96"
+                fill-opacity="0.08" stroke="none" />
             </svg>
           </div>
-          <div class="flex-1">
-            <h3 class="text-gray-900 mb-2 text-left text-lg font-semibold">Your data stays yours, always</h3>
-            <p class="text-gray-600 text-sm mb-3">
-              We never store, sell, or share your financial information. You remain in control of your data from start
-              to finish.
-            </p>
-            <button id="privacyInfoModalButton"
-              class="text-blue-600 hover:text-blue-700 transition-colors text-sm underline">
-              Learn more about how we protect your privacy
-            </button>
+          <div
+            class="col-span-2 rounded-xl bg-[#005B96]/5 ring-1 ring-[#005B96]/15 px-4 py-3 text-sm text-[#005B96] font-medium text-center">
+            ✓ Imported in one pass
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Get Started Btn -->
-    <section class="container-responsive flex flex-col items-center">
-      <button id="getStartedButton" class="ui-button w-full" data-type="primary" data-size="large">
-        Start Migrating Your Data
-      </button>
-
-      <a id="migrationInfoModalButton" class="ui-button mt-4 sm:mt-6 inline-block" data-type="text">
-        How does this work?
-      </a>
-    </section>
-
-  </main>
-
-  <div id="privacyInfoModal" class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none opacity-0 
-            transition-opacity duration-300 p-3 sm:p-4 md:p-6">
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-black/30 transition-opacity duration-300"></div>
-
-    <!-- Modal Content -->
-    <div
-      class="relative z-10 bg-white rounded-xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md md:max-w-lg w-full shadow-2xl transform translate-y-full transition-transform duration-500 max-h-[90vh] overflow-y-auto">
-
-      <!-- Close Btn -->
-      <button id="closePrivacyInfoModal"
-        class="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Close modal">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      <!-- Title -->
-      <h3 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 pr-8 text-gray-900">
-        Privacy is our top priority
-      </h3>
-
-      <!-- Body -->
-      <div class="space-y-4 text-sm text-gray-600">
-        <div>
-          <h4 class="text-gray-900 font-semibold mb-1">No Data Collection</h4>
-          <p>We never collect, store, or share your financial data.</p>
+  <!-- ===================== FEATURE: DUPLICATES ===================== -->
+  <section class="bg-gray-50 border-y border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+      <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <div class="lg:order-2">
+          <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">Duplicate control</p>
+          <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">You stay in control of duplicates</h2>
+          <p class="mt-4 text-gray-600 text-lg">Importing into an account that already has data? Choose which
+            transactions win, per account.</p>
         </div>
-        <div>
-          <h4 class="text-gray-900 font-semibold mb-1">Secure Connections</h4>
-          <p>We use secure, encrypted, and read-only connections when accessing your YNAB data.
-          </p>
-        </div>
-        <div>
-          <h4 class="text-gray-900 font-semibold mb-1">You're in Control</h4>
-          <p>At any point in time you have full control to wipe your data and stop the migration process.</p>
-        </div>
-        <div>
-          <h4 class="text-gray-900 font-semibold mb-1">Open Source & Auditable</h4>
-          <p>Everything is transparent and can be reviewed by security experts. We have nothing to hide because we keep
-            no copies. See <a href="https://github.com/your-repo" class="text-blue-600 hover:underline">our source
-              code</a>.</p>
-        </div>
-      </div>
-
-      <div class="mt-6 sm:mt-8 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div class="flex items-start gap-2 sm:gap-3">
-          <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-              clip-rule="evenodd" />
-          </svg>
-          <p class="text-xs sm:text-sm text-green-800 leading-relaxed">
-            <strong>100% Private:</strong> Your financial data is sensitive, and we treat it that way. You remain the
-            sole owner of every byte.
-          </p>
+        <div class="lg:order-1 rounded-2xl border border-gray-200 bg-white shadow-xl overflow-hidden">
+          <div class="flex items-center gap-1.5 px-4 py-3 border-b border-gray-100 bg-gray-50">
+            <span class="w-3 h-3 rounded-full bg-red-400"></span><span
+              class="w-3 h-3 rounded-full bg-yellow-400"></span><span class="w-3 h-3 rounded-full bg-green-400"></span>
+          </div>
+          <div class="p-5 space-y-3">
+            <label class="flex items-start gap-3 rounded-xl border-2 border-[#005B96] bg-[#005B96]/5 p-3">
+              <span class="mt-0.5 w-4 h-4 rounded-full border-[5px] border-[#005B96]"></span>
+              <span><span class="block text-sm font-semibold">Prioritize the CSV</span><span
+                  class="block text-xs text-gray-500">Replace overlapping Monarch transactions with your YNAB
+                  data.</span></span>
+            </label>
+            <label class="flex items-start gap-3 rounded-xl border border-gray-200 p-3">
+              <span class="mt-0.5 w-4 h-4 rounded-full border-2 border-gray-300"></span>
+              <span><span class="block text-sm font-semibold">Prioritize Monarch</span><span
+                  class="block text-xs text-gray-500">Keep existing data; only fill in older history.</span></span>
+            </label>
+            <label class="flex items-start gap-3 rounded-xl border border-gray-200 p-3">
+              <span class="mt-0.5 w-4 h-4 rounded-full border-2 border-gray-300"></span>
+              <span><span class="block text-sm font-semibold">Import everything</span><span
+                  class="block text-xs text-gray-500">Bring it all in without removing anything.</span></span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <div id="migrationInfoModal"
-    class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300 p-3 sm:p-4 md:p-6">
-
-    <!-- Overlay -->
-    <div class="absolute inset-0 bg-black/30 transition-opacity duration-300"></div>
-
-    <!-- Modal Content -->
-    <div
-      class="relative z-10 bg-white rounded-xl p-4 sm:p-6 md:p-8 max-w-sm sm:max-w-md md:max-w-lg w-full shadow-2xl transform translate-y-full transition-transform duration-500 max-h-[90vh] overflow-y-auto">
-
-      <!-- Close Btn -->
-      <button id="closeMigrationInfoModal"
-        class="absolute top-3 right-3 sm:top-4 sm:right-4 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Close modal">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      <!-- Title -->
-      <h3 class="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-6 pr-8 text-gray-900">
-        How the Migration Process Works
-      </h3>
-
-      <!-- Body -->
-      <div class="space-y-4 text-sm text-gray-600">
-        <div>
-          <h4 class="text-gray-900 text-sm font-semibold mb-1">Step 1: Access Your Data</h4>
-          <p class="text-gray-600 text-sm">Connect your YNAB account or upload your data manually. We'll retrieve your
-            budgets, transactions, categories, and accounts.</p>
+  <!-- ===================== FEATURE: DATA SOURCES ===================== -->
+  <section class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+    <div class="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">Flexible sources</p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Bring your data your way</h2>
+        <p class="mt-4 text-gray-600 text-lg">Upload your YNAB export today. Secure one-click YNAB connect is on the
+          way.</p>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
+          <div
+            class="w-11 h-11 rounded-xl bg-[#005B96]/10 text-[#005B96] flex items-center justify-center text-xl mb-4">📦
+          </div>
+          <div class="font-semibold">Upload YNAB export</div>
+          <p class="mt-1 text-sm text-gray-600">Drop in your YNAB <span class="font-mono text-xs">.zip</span> and we
+            handle the rest.</p>
+          <span
+            class="mt-4 inline-block text-xs font-semibold text-green-700 bg-green-50 rounded-full px-2.5 py-1">Available
+            now</span>
         </div>
-        <div>
-          <h4 class="text-gray-900 text-sm font-semibold mb-1">Step 2: Filter & Process</h4>
-          <p class="text-gray-600 text-sm">Decide what to migrate and make edits as needed.</p>
-        </div>
-        <div>
-          <h4 class="text-gray-900 text-sm font-semibold mb-1">Step 3: Download or Import</h4>
-          <p class="text-gray-600 text-sm">Decide to receive a ready-to-import file that you can upload into Monarch
-            Money yourself, or connect to your Monarch Money account to automatically migrate your data.</p>
+        <div class="rounded-2xl border border-gray-200 bg-white shadow-sm p-6">
+          <div
+            class="w-11 h-11 rounded-xl bg-[#005B96]/10 text-[#005B96] flex items-center justify-center text-xl mb-4">🔗
+          </div>
+          <div class="font-semibold">Connect with YNAB</div>
+          <p class="mt-1 text-sm text-gray-600">Securely pull your data with one click, no files.</p>
+          <span
+            class="mt-4 inline-block text-xs font-semibold text-amber-700 bg-amber-50 rounded-full px-2.5 py-1">Coming
+            soon</span>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
+  <!-- ===================== MORE CAPABILITIES ===================== -->
+  <section class="bg-gray-50 border-y border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">And more</p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Every detail, handled</h2>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">🏷️</div>
+          <div class="font-semibold">Category &amp; tag mapping</div>
+          <p class="mt-1 text-sm text-gray-600">Match YNAB categories and tags to your Monarch ones, or create new
+            ones, grouped, with icons.</p>
+        </div>
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">✏️</div>
+          <div class="font-semibold">Rename &amp; edit first</div>
+          <p class="mt-1 text-sm text-gray-600">Tidy account names and pick which accounts to bring over before anything
+            imports.</p>
+        </div>
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">🧠</div>
+          <div class="font-semibold">Smart type detection</div>
+          <p class="mt-1 text-sm text-gray-600">Account types and subtypes are detected for you. Adjust any with a tap.
+          </p>
+        </div>
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">🔁</div>
+          <div class="font-semibold">Retry just the failures</div>
+          <p class="mt-1 text-sm text-gray-600">If an account hiccups, re-run only that one, no starting over.</p>
+        </div>
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">🔒</div>
+          <div class="font-semibold">Private by design</div>
+          <p class="mt-1 text-sm text-gray-600">Your data is processed in your browser and never stored on our servers.
+          </p>
+        </div>
+        <div class="rounded-2xl bg-white border border-gray-100 p-6">
+          <div class="text-2xl mb-3">💛</div>
+          <div class="font-semibold">Free &amp; open source</div>
+          <p class="mt-1 text-sm text-gray-600">No paywall. Review every line of code on GitHub.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HOW IT WORKS ===================== -->
+  <section id="how" class="max-w-7xl mx-auto px-6 py-16 sm:py-24">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">How it works</p>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Three steps. A few minutes.</h2>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-6">
+      <div class="text-center">
+        <div
+          class="w-12 h-12 rounded-full bg-[#005B96] text-white font-bold flex items-center justify-center mx-auto mb-4">
+          1</div>
+        <div class="font-semibold">Upload your YNAB data</div>
+        <p class="mt-1 text-sm text-gray-600">Drop in your export and we parse every account and transaction.</p>
+      </div>
+      <div class="text-center">
+        <div
+          class="w-12 h-12 rounded-full bg-[#005B96] text-white font-bold flex items-center justify-center mx-auto mb-4">
+          2</div>
+        <div class="font-semibold">Map &amp; review</div>
+        <p class="mt-1 text-sm text-gray-600">Choose accounts, categories, tags, and how duplicates are handled.</p>
+      </div>
+      <div class="text-center">
+        <div
+          class="w-12 h-12 rounded-full bg-[#005B96] text-white font-bold flex items-center justify-center mx-auto mb-4">
+          3</div>
+        <div class="font-semibold">Import to Monarch</div>
+        <p class="mt-1 text-sm text-gray-600">Everything moves over in one pass: transactions and balances.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FAQ ===================== -->
+  <section class="bg-gray-50 border-t border-gray-100">
+    <div class="max-w-3xl mx-auto px-6 py-16 sm:py-24">
+      <div class="text-center mb-10">
+        <p class="text-sm font-semibold uppercase tracking-wider text-[#005B96] mb-3">FAQ</p>
+        <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Questions, answered</h2>
+      </div>
+
+      <div class="rounded-2xl bg-white border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">Is my financial data safe?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">Yes. Your data is processed in your browser and is
+            never stored, sold, or shared. The project is open source, so you can verify exactly what happens to it.
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">How is this different from Monarch's own importer?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">Monarch imports one account at a time and splits
+            transactions and balance history into separate flows. This tool brings every account in at once, combines
+            transactions and balances into a single import, and adds account/category/tag mapping and duplicate control
+            on top.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">Do you import both transactions and balances?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">Yes, both, in a single pass, for every account you
+            select.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">Can you create synced (bank-connected) accounts?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">No. Synced accounts, the ones connected to a bank or
+            financial institution, can only be set up from inside Monarch, so this tool creates manual accounts. You can
+            still end up with a synced account that holds your full YNAB history, though: import your history here, connect
+            your bank in Monarch, then use Monarch's Transfer tool to merge the two. <a class="js-synced-guide font-semibold text-[#005B96] hover:underline" href="/synced-accounts">Read the step-by-step guide →</a></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">What happens to duplicate transactions?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">When you import into an account that already has
+            data, you choose per account whether your YNAB data, the existing Monarch data, or all of it takes priority.
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">What do I need to get started?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">Your YNAB export file (a <span
+              class="font-mono text-xs">.zip</span>) and your Monarch login. A secure one-click YNAB connection is
+            coming soon.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">Is it affiliated with YNAB or Monarch?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">No. This is an independent, open-source tool and is
+            not affiliated with or endorsed by YNAB or Monarch Money.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q w-full flex items-center justify-between gap-4 px-5 py-5 text-left">
+            <span class="font-semibold">Is it really free?</span>
+            <svg class="faq-chevron w-5 h-5 text-gray-400 flex-shrink-0 transition-transform" fill="none"
+              stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="faq-a hidden px-5 pb-5 text-gray-600 text-sm">Yes, completely free. If it saved you time, a tip
+            via the “Support this tool” button is appreciated but never required.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== FINAL CTA ===================== -->
+  <section class="bg-[#005B96]">
+    <div class="max-w-4xl mx-auto px-6 py-16 sm:py-20 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight text-white">Ready to move to Monarch?</h2>
+      <p class="mt-3 text-white/80">Bring your whole YNAB history over in a few minutes.</p>
+      <div class="mt-8 flex justify-center">
+        <button class="js-start ui-button" data-type="secondary" data-size="large">Start migrating, it's free</button>
+      </div>
+    </div>
+  </section>
 
 </div>

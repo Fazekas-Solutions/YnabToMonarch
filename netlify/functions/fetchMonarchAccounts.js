@@ -1,6 +1,7 @@
-const fetch = require('node-fetch')
+import fetch from 'node-fetch';
+import { graphqlHeaders } from '../../shared/monarchHeaders.js';
 
-module.exports.handler = async (event, context) => {
+export async function handler(event, context) {
   console.group("fetchMonarchAccounts")
 
   if (event.httpMethod !== 'POST') {
@@ -24,20 +25,21 @@ module.exports.handler = async (event, context) => {
 
     const response = await fetch('https://api.monarch.com/graphql', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Token ${token}`
-      },
+      headers: graphqlHeaders(token),
       body: JSON.stringify({ query: 'query { accounts { id displayName } }' })
     })
 
-    const result = await response.json();
-    if (!response.ok) {
-      console.error("MonarchAccount ❌ API responded with error", { status: response.status, error: error })
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || result.errors) {
+      const message = result?.errors?.map(e => e.message).join('; ')
+        || result?.error
+        || result?.detail
+        || 'Account fetch failed.'
+      console.error("MonarchAccount ❌ API responded with error", { status: response.status, error: message })
       console.groupEnd("fetchMonarchAccounts")
       return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: error.message || 'Account fetch failed.' })
+        statusCode: response.ok ? 502 : response.status,
+        body: JSON.stringify({ error: message })
       }
     }
     console.groupEnd("fetchMonarchAccounts")

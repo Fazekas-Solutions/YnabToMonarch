@@ -4,7 +4,7 @@ import { navigate, goBack } from '../../router.js';
 import { renderButtons } from '../../components/button.js';
 import { monarchApi } from '../../api/monarchApi.js';
 import { toggleElementVisibility, toggleDisabled } from '../../utils/dom.js';
-import { createSimpleNavigationBar } from '../../utils/navigationBar.js';
+import { createStepHeader } from '../../utils/navigationBar.js';
 import {
   saveToLocalStorage, getLocalStorage, clearStorage
 } from '../../utils/storage.js';
@@ -13,10 +13,11 @@ import { patchState, clearState } from '../../utils/state.js';
 
 
 export default async function initMonarchCredentialsView() {
-  // Add navigation bar at the bottom of the content
-  const mainContainer = document.querySelector('.container-responsive');
-  mainContainer.insertAdjacentHTML('beforeend', createSimpleNavigationBar({
-    backText: "Back"
+  // Full-width step header (shared component).
+  document.querySelector('.container-responsive').insertAdjacentHTML('afterbegin', createStepHeader({
+    title: "Connect your Monarch account",
+    subtitle: "Sign in to authorize the import. We bring your accounts and transactions across for you.",
+    backText: "Back to Method"
   }));
 
   const $ = (id) => document.getElementById(id);
@@ -165,7 +166,7 @@ export default async function initMonarchCredentialsView() {
           saveToLocalStorage({ email, encryptedPassword, token: response.token, remember: true });
         }
 
-        return navigate('/complete');
+        return navigate('/mapping');
       }
       
       const apiError = response?.detail || response?.error || "Unexpected login response."

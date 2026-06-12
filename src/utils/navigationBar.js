@@ -55,12 +55,104 @@ export function createNavigationBar(config = {}) {
 
   return `
     <!-- Navigation Bar -->
-    <div class="bg-white border-t border-gray-200 mt-8 sm:mt-12">
+    <div class="bg-white border-t border-gray-100 mt-8 sm:mt-12">
       <div class="container-responsive">
         <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center py-6 sm:py-8 gap-4 sm:gap-6 ${containerClass}">
           ${backButton}
           ${nextButton}
         </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Creates a top-left text-style "back" link, meant to be placed above a view's
+ * header. Renders as a subtle text button (not a `.ui-button`, so renderButtons
+ * leaves it untouched) with a leading back arrow.
+ * @param {Object} config - Navigation configuration
+ * @param {string} config.backText - Text for the back button (default: "Back")
+ * @param {string} config.backId - ID for the back button (default: "backBtn")
+ * @param {string} config.containerClass - Additional classes for the wrapper (e.g. bottom margin)
+ * @param {boolean} config.iconOnly - Render a compact icon-only button (default: false)
+ * @param {string} config.ariaLabel - Accessible label / tooltip (defaults to backText)
+ * @returns {string} HTML string for the back link
+ */
+export function createBackButton(config = {}) {
+  const {
+    backText = "Back",
+    backId = "backBtn",
+    containerClass = "",
+    iconOnly = false,
+    ariaLabel = backText
+  } = config;
+
+  if (iconOnly) {
+    // Compact circular control, meant to sit inline beside a view's title.
+    // Airbnb-style: white circle, dark icon, defined border + drop shadow so it
+    // reads clearly as a tappable control without competing with the title.
+    return `
+      <button id="${backId}" type="button" title="${ariaLabel}" aria-label="${ariaLabel}"
+              class="nav-back group inline-flex items-center justify-center w-10 h-10 ${containerClass}
+                     rounded-full border border-gray-300 bg-white text-gray-800 shadow-sm
+                     hover:bg-gray-50 hover:border-gray-400
+                     transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+    `;
+  }
+
+  return `
+    <!-- Back navigation -->
+    <div class="w-full ${containerClass}">
+      <button id="${backId}" type="button"
+              class="nav-back group inline-flex items-center gap-1.5 -ml-1 px-2 py-1.5 rounded-md text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        ${backText}
+      </button>
+    </div>
+  `;
+}
+
+/**
+ * Canonical step-page header used across the migration flow so every step
+ * shares the exact same gutters, spacing, typography, and back-control
+ * treatment. Renders a compact, left-aligned hero: an inline icon back button
+ * (omit `backText` to drop it, e.g. on terminal screens) beside the title and
+ * an optional subtitle.
+ *
+ * The back button (when shown) carries `id=backId` so callers wire it with
+ * `document.getElementById(backId).addEventListener('click', goBack)`.
+ *
+ * @param {Object} config
+ * @param {string} config.title - Page title (required)
+ * @param {string} [config.subtitle] - Supporting line under the title
+ * @param {string} [config.backText] - Back-button aria-label/tooltip; omit to hide the back button
+ * @param {string} [config.backId] - Back button id (default: "backBtn")
+ * @param {string} [config.titleId] - Optional id on the <h2>
+ * @param {string} [config.subtitleId] - Optional id on the subtitle <p>
+ * @returns {string} HTML string for the header
+ */
+export function createStepHeader(config = {}) {
+  const { title = '', subtitle = '', backText, backId = 'backBtn', titleId = '', subtitleId = '' } = config;
+
+  const back = backText
+    ? createBackButton({ iconOnly: true, ariaLabel: backText, backId })
+    : '';
+
+  // Back button pinned to the left; title + subtitle centered on screen. The
+  // horizontal padding keeps the centered text clear of the back control on
+  // narrow viewports.
+  return `
+    <div class="relative w-full mb-5 sm:mb-6">
+      ${back ? `<div class="absolute left-0 top-1/2 -translate-y-1/2">${back}</div>` : ''}
+      <div class="text-center max-w-2xl mx-auto px-12">
+        <h2 ${titleId ? `id="${titleId}"` : ''} class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">${title}</h2>
+        ${subtitle ? `<p ${subtitleId ? `id="${subtitleId}"` : ''} class="text-gray-500 text-sm sm:text-base leading-snug mt-1">${subtitle}</p>` : ''}
       </div>
     </div>
   `;
@@ -83,7 +175,7 @@ export function createSimpleNavigationBar(config = {}) {
 
   return `
     <!-- Navigation Bar -->
-    <div class="bg-white border-t border-gray-200 mt-8 sm:mt-12">
+    <div class="bg-white border-t border-gray-100 mt-8 sm:mt-12">
       <div class="container-responsive">
         <div class="flex justify-center items-center py-6 sm:py-8 ${containerClass}">
           <button id="${backId}" class="ui-button w-full sm:w-auto sm:max-w-xs whitespace-nowrap" data-type="secondary" data-size="large">
@@ -147,7 +239,7 @@ export function createCustomNavigationBar(buttons = [], containerClass = "") {
 
   return `
     <!-- Navigation Bar -->
-    <div class="bg-white border-t border-gray-200 mt-8 sm:mt-12">
+    <div class="bg-white border-t border-gray-100 mt-8 sm:mt-12">
       <div class="container-responsive">
         <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center py-6 sm:py-8 gap-4 sm:gap-6 ${containerClass}">
           ${buttonElements}

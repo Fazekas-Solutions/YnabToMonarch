@@ -1,5 +1,27 @@
 @import "tailwindcss";
 
+/* Brand color system. The product's brand blue is the azure #1993e5 (the same
+   color as the primary CTA and the logo gradient's bright stop). We retheme
+   Tailwind's `blue` scale onto that azure ramp so every existing `blue-*`
+   utility (accents, chips, focus rings) matches the CTA out of the box — one
+   source of truth instead of a mix of azure and indigo. Deep brand #005B96 is
+   kept as `brand` for heavy brand moments (logo, hero gradients). */
+@theme {
+  --color-blue-50:  #eff7fd;
+  --color-blue-100: #d9edfb;
+  --color-blue-200: #b3dbf7;
+  --color-blue-300: #7cc3f1;
+  --color-blue-400: #40a6ea;
+  --color-blue-500: #1993e5;
+  --color-blue-600: #1278c2;
+  --color-blue-700: #0f63a0;
+  --color-blue-800: #11527f;
+  --color-blue-900: #133f63;
+  --color-blue-950: #0c2a45;
+
+  --color-brand: #005B96;
+}
+
 @layer utilities {
   .always-scroll {
     overflow-y: scroll;
@@ -114,15 +136,51 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
-button {
-  transition: all 0.2s ease;
+/* Upload dropzone "drop here" feedback. Defined here rather than as toggled
+   Tailwind utilities because the drag state is applied from JS, where arbitrary
+   values (e.g. the #005B96 brand color) aren't picked up by the class scanner. */
+#dropzone.is-dragging {
+  border-color: #005B96;
+  background-color: rgba(0, 91, 150, 0.06);
+  box-shadow: 0 0 0 4px rgba(0, 91, 150, 0.1);
+  transform: scale(1.01);
 }
 
-button:hover {
-  @media (hover: hover) {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  }
+/* Gentle right-nudge for the YNAB → Monarch arrow in the transformation pill. */
+@keyframes migrate-arrow {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(3px); }
+}
+.migrate-arrow {
+  animation: migrate-arrow 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .migrate-arrow { animation: none; }
+}
+
+/* Smooth color transitions on hover. Hover must NEVER move or lift an element
+   (no translate/scale/shadow) — only color changes. */
+button {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Interactive elements show a pointer cursor; disabled controls show
+   not-allowed. Text fields keep their default text (I-beam) cursor. */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+select:not(:disabled),
+summary,
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled,
+[aria-disabled="true"],
+select:disabled,
+input:disabled {
+  cursor: not-allowed;
 }
 
 /* Better focus styles for accessibility */

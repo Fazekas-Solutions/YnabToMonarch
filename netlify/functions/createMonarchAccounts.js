@@ -1,11 +1,20 @@
 import fetch from 'node-fetch';
 import FormData from 'form-data';
 import { Readable } from 'stream';
-import generateCSV from '../../shared/generateCsv.js';
+import generateCSV, { COLUMN_MAPPING } from '../../shared/generateCsv.js';
+import { graphqlHeaders, restHeaders } from '../../shared/monarchHeaders.js';
+import {
+  buildCategoryMapping,
+  buildTagMapping,
+  ACCOUNT_CREATE_NEW,
+  IMPORT_PRIORITY_DEFAULT
+} from '../../shared/mappingHelpers.js';
 
 // Constants for configuration
 const GRAPHQL_ENDPOINT = 'https://api.monarch.com/graphql'
 const STATEMENTS_UPLOAD_URL = 'https://api.monarch.com/statements/upload-async/'
+
+const isNonEmpty = obj => obj && typeof obj === 'object' && Object.keys(obj).length > 0
 
 export async function handler(event, context) {
   console.group("CreateMonarchAccounts Lambda Handler")
@@ -17,9 +26,42 @@ export async function handler(event, context) {
   }
 
   try {
-    const { accounts, token } = JSON.parse(event.body)
+    const { accounts, token, accountMapping, columnMapping, categoryMapping, tagMapping, priorityMapping } = JSON.parse(event.body)
+
+    // The mapping wizard normally supplies the category/tag mappings. If they're
+    // absent (e.g. the client refreshed and lost them), fall back to building
+    // them here: fetch the user's existing categories/tags and map onto matching
+    // names, creating new ones otherwise. Best-effort — lookup failures just mean
+    // everything is created new rather than aborting the migration.
+    const included = accounts.filter(a => a.included);
+    let finalCategoryMapping = isNonEmpty(categoryMapping) ? categoryMapping : null;
+    let finalTagMapping = isNonEmpty(tagMapping) ? tagMapping : null;
+
+    if (!finalCategoryMapping || !finalTagMapping) {
+      let existingCategories = [];
+      let existingTags = [];
+      if (!finalCategoryMapping) {
+        try { existingCategories = await getMonarchCategories(token); }
+        catch (e) { console.warn("Couldn't fetch Monarch categories; new categories will be created.", e.message); }
+        finalCategoryMapping = buildCategoryMapping(included, existingCategories);
+      }
+      if (!finalTagMapping) {
+        try { existingTags = await getMonarchTags(token); }
+        catch (e) { console.warn("Couldn't fetch Monarch tags; new tags will be created.", e.message); }
+        finalTagMapping = buildTagMapping(included, existingTags);
+      }
+    }
+
+    const mappings = {
+      accountMapping: accountMapping || {},
+      columnMapping: isNonEmpty(columnMapping) ? columnMapping : COLUMN_MAPPING,
+      categoryMapping: finalCategoryMapping,
+      tagMapping: finalTagMapping,
+      priorityMapping: priorityMapping || {}
+    };
+
     const results = await Promise.allSettled(accounts.map(account =>
-      processAccount(token, account).then((result) => ({
+      processAccount(token, account, mappings).then((result) => ({
         name: account.modifiedName,
         success: true,
         sessionKeys: result.sessionKeys || []
@@ -51,7 +93,7 @@ export async function handler(event, context) {
   }
 }
 
-async function processAccount(token, account) {
+async function processAccount(token, account, mappings) {
   console.group("Process account")
 
   if (!account.included) {
@@ -59,28 +101,40 @@ async function processAccount(token, account) {
     return { skipped: true };
   }
 
-  const accountInput = {
-    type: account.type,
-    subtype: account.subtype,
-    includeInNetWorth: true,
-    name: account.modifiedName,
-    displayBalance: 0.0
-  }
+  // Resolve the target account: either an existing Monarch account chosen in the
+  // mapping step, or a brand-new account we create here.
+  const target = (mappings.accountMapping || {})[account.accountName];
+  let accountId;
 
-  // Create new account in Monarch
-  const { account: newAccount, error } = await createManualAccount(token, accountInput)
-  if (error) return { error }
+  if (target && target !== ACCOUNT_CREATE_NEW) {
+    accountId = target;
+  } else {
+    const accountInput = {
+      type: account.type,
+      subtype: account.subtype,
+      includeInNetWorth: true,
+      name: account.modifiedName,
+      displayBalance: 0.0
+    }
+    const { account: newAccount, error } = await createManualAccount(token, accountInput)
+    if (error) return { error }
+    accountId = newAccount.id;
+  }
 
   const txChunks = chunkArray(account.transactions, 3000);
   if (txChunks.length > 1) {
     console.warn(`Account ${account.modifiedName} has ${txChunks.length} chunks of transactions, which may take longer to process.`);
   }
 
+  // Per-account import priority (only meaningful for existing accounts; new
+  // accounts are empty so the value is inert).
+  const importPriority = (mappings.priorityMapping || {})[account.accountName] || IMPORT_PRIORITY_DEFAULT;
+
   const sessionKeys = [];
 
   await Promise.all(txChunks.map(async (chunk) => {
     const { sessionKey } = await uploadStatementsFile(token, chunk, account.modifiedName);
-    await importTransactions(token, newAccount.id, sessionKey);
+    await importTransactions(token, accountId, sessionKey, { ...mappings, importPriority });
     sessionKeys.push(sessionKey);
   }));
 
@@ -137,19 +191,19 @@ async function uploadStatementsFile(token, transactions, accountName) {
     filename: 'transactions.csv',
     contentType: 'text/csv'
   })
+  // The web client sends a second, empty-named field ("false") alongside the
+  // file. Mirror it so our request matches the upload endpoint's expectations.
+  form.append('', 'false')
 
   const res = await fetch(STATEMENTS_UPLOAD_URL, {
     method: 'POST',
-    headers: {
-      Authorization: `Token ${token}`,
-      ...form.getHeaders()
-    },
+    headers: restHeaders({ token, extra: form.getHeaders() }),
     body: form
   })
 
-  const result = await res.json()
+  const result = await res.json().catch(() => ({}))
 
-  if (!res.ok) {
+  if (!res.ok || !result.session_key) {
     console.error("❌ Upload failed", { status: res.status, result: result });
     console.groupEnd()
     throw new Error(`Upload failed: ${JSON.stringify(result)}`)
@@ -159,7 +213,7 @@ async function uploadStatementsFile(token, transactions, accountName) {
   return { sessionKey: result.session_key }
 }
 
-async function importTransactions(token, accountId, sessionKey) {
+async function importTransactions(token, accountId, sessionKey, mappings = {}) {
   console.group("Importing Transactions")
 
   const query = `
@@ -186,19 +240,71 @@ async function importTransactions(token, accountId, sessionKey) {
       }
   `
 
+  // Monarch's parser now expects explicit mappings declaring how to interpret
+  // columns and how to handle each category/tag value found in the CSV. These
+  // map-typed inputs are passed as JSON-encoded strings.
   const variables = {
     input: {
-      parserName: 'monarch_csv',
+      // 'mint_csv' is the generic CSV-import parser that respects an explicit
+      // columnMapping (confirmed from real Monarch traffic). 'monarch_csv' is a
+      // fixed-format parser that ignores/conflicts with columnMapping and makes
+      // the parse session report status "errored".
+      parserName: 'mint_csv',
       sessionKey,
       accountId,
+      importPriority: mappings.importPriority || IMPORT_PRIORITY_DEFAULT,
+      columnMapping: JSON.stringify(mappings.columnMapping || COLUMN_MAPPING),
+      categoryMapping: JSON.stringify(mappings.categoryMapping || {}),
+      tagMapping: JSON.stringify(mappings.tagMapping || {}),
       skipCheckForDuplicates: false,
-      shouldUpdateBalance: true
+      shouldUpdateBalance: true,
+      allowWarnings: true
     }
   }
 
   const res = await performGraphQLRequest(token, query, variables)
   if (res.error) throw new Error(res.error);
+
+  // The parse can fail at the data level while still returning HTTP 200 — surface
+  // that error message instead of silently treating the import as successful.
+  const session = res.data?.parseUploadStatementSession?.uploadStatementSession;
+  if (session && ['failed', 'error', 'errored'].includes(session.status)) {
+    console.groupEnd()
+    const message = session.errorMessage && session.errorMessage !== 'None'
+      ? session.errorMessage
+      : 'Monarch could not parse the uploaded statement.';
+    throw new Error(message);
+  }
+
   console.groupEnd()
+}
+
+async function getMonarchCategories(token) {
+  const query = `
+    query Web_GetCategories {
+      categories {
+        id
+        name
+        __typename
+      }
+    }
+  `;
+  const res = await performGraphQLRequest(token, query, {});
+  return res.data?.categories || [];
+}
+
+async function getMonarchTags(token) {
+  const query = `
+    query Common_GetHouseholdTransactionTags($search: String, $limit: Int, $bulkParams: BulkTransactionDataParams) {
+      householdTransactionTags(search: $search, limit: $limit, bulkParams: $bulkParams) {
+        id
+        name
+        __typename
+      }
+    }
+  `;
+  const res = await performGraphQLRequest(token, query, {});
+  return res.data?.householdTransactionTags || [];
 }
 
 async function performGraphQLRequest(token, query, variables) {
@@ -206,10 +312,7 @@ async function performGraphQLRequest(token, query, variables) {
 
   const res = await fetch(GRAPHQL_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Token ${token}`
-    },
+    headers: graphqlHeaders(token),
     body: JSON.stringify({ query, variables })
   })
 

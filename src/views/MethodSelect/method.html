@@ -1,122 +1,65 @@
-<div class="container-responsive flex flex-col items-center justify-center py-6 sm:py-8 md:py-12 lg:py-16 space-y-6 sm:space-y-8 md:space-y-10 min-h-[calc(100vh-200px)]">
+<div class="container-responsive py-4 sm:py-6 md:py-8">
 
-  <!-- Header -->
-  <div class="text-center space-y-3 sm:space-y-4 max-w-4xl w-full">
-    <h2 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
-      Choose Your Migration Method
-    </h2>
-    <p class="text-gray-600 text-sm sm:text-base md:text-lg max-w-2xl mx-auto px-2 leading-relaxed">
-      You can either manually import your accounts into Monarch or let us automatically import your data.
-    </p>
-  </div>
+  <!-- Full-width step header injected here by JS (createStepHeader) -->
 
-  <!-- Summary Counts -->
-  <div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 md:gap-10 
-              bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-6 md:p-8 
-              border border-blue-100 w-full max-w-2xl shadow-sm">
+  <div class="w-full">
 
-    <div class="text-center">
-      <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800" id="totalCountDisplay">0</div>
-      <div class="text-gray-600 text-xs sm:text-sm md:text-base font-medium">Total Accounts</div>
-    </div>
+    <!-- Migration options -->
+    <div role="group" aria-label="Import method" class="grid gap-4 sm:gap-5 lg:grid-cols-2">
 
-    <div class="hidden sm:block w-px h-12 bg-gray-300"></div>
-    <div class="sm:hidden w-full h-px bg-gray-300"></div>
-
-    <div class="text-center">
-      <div class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-green-600" id="filesCountDisplay">0</div>
-      <div class="text-gray-600 text-xs sm:text-sm md:text-base font-medium">Accounts To Migrate</div>
-    </div>
-  </div>
-
-  <!-- Migration Options -->
-  <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 md:gap-8 w-full max-w-5xl">
-
-    <!-- Manual Import -->
-    <div class="w-full lg:flex-1 group cursor-pointer" id="manualImportBtn">
-      <div class="h-full p-4 sm:p-6 md:p-8 border-2 border-gray-200 rounded-xl shadow-sm 
-                  hover:shadow-lg hover:border-blue-300 transition-all duration-300 
-                  bg-white group-hover:bg-blue-50/30 relative overflow-hidden">
-        
-        <!-- Background decoration -->
-        <div class="absolute top-0 right-0 w-20 h-20 bg-blue-100 rounded-full -translate-y-10 translate-x-10 opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-        
-        <div class="relative z-10">
-          <div class="flex items-start justify-between mb-4">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition-colors duration-300">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-            <div class="text-blue-600 group-hover:text-blue-700 transition-colors duration-300">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-          
-          <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 text-gray-900">Manual Import</h3>
-          <p class="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed min-h-[3rem]">
-            Download <span id="manualFileCount" class="font-semibold text-blue-600">0</span> CSV files and upload them directly
-            into Monarch yourself. Perfect for users who prefer full control.
-          </p>
-          
-          <div class="flex items-center text-blue-600 font-semibold text-sm sm:text-base group-hover:text-blue-700 transition-colors duration-300">
-            Select Manual Import
-            <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      <!-- Auto Import (recommended) -->
+      <button type="button" id="autoImportBtn"
+        class="group flex flex-col text-left w-full rounded-2xl border border-green-300 bg-white p-5 sm:p-6
+               shadow-sm hover:border-green-400 hover:bg-green-50/40 transition-colors
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex-shrink-0 w-11 h-11 rounded-xl bg-green-100 text-green-600 flex items-center justify-center">
+            <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-          </div>
+          </span>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Auto Import</h3>
+          <span class="ml-auto flex-shrink-0 inline-flex items-center rounded-full bg-green-100 text-green-700 text-xs font-semibold px-2.5 py-1">
+            Recommended
+          </span>
         </div>
-      </div>
-    </div>
+        <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+          We sign in to Monarch and bring your selected accounts across for you.
+        </p>
+        <span class="mt-auto pt-5 inline-flex items-center gap-1.5 text-green-700 font-semibold text-sm sm:text-base">
+          Continue with Auto Import
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </button>
 
-    <!-- Auto Import -->
-    <div class="w-full lg:flex-1 group cursor-pointer" id="autoImportBtn">
-      <div class="h-full p-4 sm:p-6 md:p-8 border-2 border-gray-200 rounded-xl shadow-sm 
-                  hover:shadow-lg hover:border-green-300 transition-all duration-300 
-                  bg-white group-hover:bg-green-50/30 relative overflow-hidden">
-        
-        <!-- Background decoration -->
-        <div class="absolute top-0 right-0 w-20 h-20 bg-green-100 rounded-full -translate-y-10 translate-x-10 opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-        
-        <!-- "Recommended" badge -->
-        <div class="absolute top-4 left-4 bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-          Recommended
-        </div>
-        
-        <div class="relative z-10 pt-6">
-          <div class="flex items-start justify-between mb-4">
-            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div class="text-green-600 group-hover:text-green-700 transition-colors duration-300">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </div>
-          
-          <h3 class="text-lg sm:text-xl md:text-2xl font-semibold mb-3 text-gray-900">Auto Import</h3>
-          <p class="text-gray-600 text-sm sm:text-base mb-6 leading-relaxed min-h-[3rem]">
-            We'll connect to Monarch and automatically import your selected accounts on
-            your behalf. Fast, secure, and hassle-free.
-          </p>
-          
-          <div class="flex items-center text-green-600 font-semibold text-sm sm:text-base group-hover:text-green-700 transition-colors duration-300">
-            Select Auto Import
-            <svg class="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      <!-- Manual Import -->
+      <button type="button" id="manualImportBtn"
+        class="group flex flex-col text-left w-full rounded-2xl border border-gray-200 bg-white p-5 sm:p-6
+               shadow-sm hover:border-blue-300 hover:bg-blue-50/40 transition-colors
+               focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="flex-shrink-0 w-11 h-11 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+            <svg aria-hidden="true" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
             </svg>
-          </div>
+          </span>
+          <h3 class="text-lg sm:text-xl font-semibold text-gray-900">Manual Import</h3>
         </div>
-      </div>
-    </div>
+        <p class="text-gray-600 text-sm sm:text-base leading-relaxed">
+          Download <span id="manualFileCount" class="font-semibold text-blue-600">0</span> CSV files and import them
+          into Monarch yourself.
+        </p>
+        <span class="mt-auto pt-5 inline-flex items-center gap-1.5 text-blue-700 font-semibold text-sm sm:text-base">
+          Continue with Manual Import
+          <svg aria-hidden="true" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
+      </button>
 
-    <!-- Navigation will be added here by JavaScript -->
+    </div>
 
   </div>
-
 </div>

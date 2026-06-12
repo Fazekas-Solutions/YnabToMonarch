@@ -1,108 +1,127 @@
 import state from '../../state.js';
 import { navigate, persistState } from '../../router.js';
 import parseYNABZip from '../../services/ynabParser.js';
-import { startYnabOauth } from '../../api/ynabOauth.js';
 import { openModal, closeModal } from '../../components/modal.js';
 import { renderButtons } from '../../components/button.js';
 
 export default function initUploadView() {
-  const errorMessage = document.getElementById('errorMessage');
-  const connectButton = document.getElementById('connectButton');
-  const manualUploadButton = document.getElementById('manualUploadButton');
+  const dropzone = document.getElementById('dropzone');
   const manualFileInput = document.getElementById('manualFileInput');
-  const oauthInfoModalButton = document.getElementById('oauthInfoModalButton');
+  const dropzoneIdle = document.getElementById('dropzoneIdle');
+  const dropzoneLoading = document.getElementById('dropzoneLoading');
+  const loadingFileName = document.getElementById('loadingFileName');
+  const errorMessage = document.getElementById('errorMessage');
+  const errorMessageText = document.getElementById('errorMessageText');
   const manualImportInfoModalButton = document.getElementById('manualImportInfoModalButton');
-  const closeOauthInfoModal = document.getElementById('closeOauthInfoModal');
   const closeManualImportInfoModal = document.getElementById('closeManualImportInfoModal');
 
   renderButtons();
 
-  connectButton?.addEventListener('click', (event) => {
-    event.preventDefault();
-    startYnabOauth();
-  });
-
-  oauthInfoModalButton?.addEventListener('click', () => openModal('oauthInfoModal'));
   manualImportInfoModalButton?.addEventListener('click', () => openModal('manualImportInfoModal'));
-  closeOauthInfoModal?.addEventListener('click', () => closeModal('oauthInfoModal'));
   closeManualImportInfoModal?.addEventListener('click', () => closeModal('manualImportInfoModal'));
 
-  manualUploadButton?.addEventListener('click', (e) => {
+  // The browser opens dropped files as a new page by default; suppress that
+  // everywhere so a near-miss drop doesn't navigate away from the flow.
+  ['dragover', 'drop'].forEach((evt) =>
+    window.addEventListener(evt, (e) => e.preventDefault())
+  );
+
+  let dragDepth = 0; // dragenter/leave fire per child; count to avoid flicker.
+
+  dropzone?.addEventListener('dragenter', (e) => {
     e.preventDefault();
-    manualFileInput?.click();
-  });
-  manualFileInput?.addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (file) await handleFile(file);
+    dragDepth += 1;
+    dropzone.classList.add('is-dragging');
   });
 
-  async function handleFile(csvFile) {
-    // Check if file is a ZIP file by extension, MIME type, or common patterns
-    const fileName = csvFile.name.toLowerCase();
-    const fileType = csvFile.type.toLowerCase();
-    
-    console.log('File upload debug:', {
-      name: csvFile.name,
-      type: csvFile.type,
-      size: csvFile.size,
-      fileName: fileName,
-      fileType: fileType
-    });
-    
-    // More permissive extension check - look for common ZIP-related extensions
-    const isZipByExtension = fileName.endsWith('.zip') || 
-                            fileName.endsWith('.bin') || 
-                            fileName.includes('ynab') ||
-                            fileName.includes('register') ||
-                            fileName.includes('export');
-                            
+  dropzone?.addEventListener('dragover', (e) => e.preventDefault());
+
+  dropzone?.addEventListener('dragleave', () => {
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (dragDepth === 0) dropzone.classList.remove('is-dragging');
+  });
+
+  dropzone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragDepth = 0;
+    dropzone.classList.remove('is-dragging');
+    const file = e.dataTransfer?.files?.[0];
+    if (file) handleFile(file);
+  });
+
+  manualFileInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) handleFile(file);
+  });
+
+  function showError(message) {
+    errorMessageText.textContent = message;
+    errorMessage.classList.remove('hidden');
+    // Return the dropzone to its idle prompt so the user can try again.
+    dropzoneLoading.classList.add('hidden');
+    dropzoneLoading.classList.remove('flex');
+    dropzoneIdle.classList.remove('hidden');
+    dropzoneIdle.classList.add('flex');
+    manualFileInput.value = ''; // allow re-selecting the same file
+  }
+
+  function showLoading(fileName) {
+    errorMessage.classList.add('hidden');
+    loadingFileName.textContent = fileName;
+    dropzoneIdle.classList.add('hidden');
+    dropzoneIdle.classList.remove('flex');
+    dropzoneLoading.classList.remove('hidden');
+    dropzoneLoading.classList.add('flex');
+  }
+
+  async function handleFile(file) {
+    // Determine whether this looks like a YNAB ZIP export. The parser is the
+    // ultimate authority, so the gate here is intentionally permissive: any
+    // ZIP-ish extension/MIME, or simply a file larger than 1KB.
+    const fileName = file.name.toLowerCase();
+    const fileType = file.type.toLowerCase();
+
+    const isZipByExtension =
+      fileName.endsWith('.zip') ||
+      fileName.endsWith('.bin') ||
+      fileName.includes('ynab') ||
+      fileName.includes('register') ||
+      fileName.includes('export');
+
     const isZipByMimeType = [
       'application/zip',
-      'application/x-zip-compressed', 
+      'application/x-zip-compressed',
       'application/octet-stream',
       'application/x-zip',
       'multipart/x-zip',
       'application/x-compressed',
-      'application/binary'
+      'application/binary',
     ].includes(fileType);
-    
-    // Very permissive check - if file is larger than 1KB, let's try to parse it
-    // The ZIP parser will ultimately determine if it's valid
-    const isPotentialZip = isZipByExtension || 
-                          isZipByMimeType || 
-                          csvFile.size > 1000; // If it's bigger than 1KB, let the parser decide
 
-    console.log('File validation debug:', {
-      isZipByExtension,
-      isZipByMimeType,
-      isPotentialZip,
-      fileSize: csvFile.size
-    });
+    const isPotentialZip = isZipByExtension || isZipByMimeType || file.size > 1000;
 
     if (!isPotentialZip) {
-      console.log('File rejected - not a potential ZIP');
-      errorMessage.textContent = 'Please upload a ZIP export from YNAB.';
-      errorMessage.classList.remove('hidden');
+      showError('That doesn’t look like a YNAB export. Please upload the .zip file you exported from YNAB.');
       return;
     }
 
-    console.log('File accepted, attempting to parse...');
+    showLoading(file.name);
+
     try {
-      const accounts = await parseYNABZip(csvFile);
+      const accounts = await parseYNABZip(file);
       state.accounts = accounts;
       persistState();
 
-      // Ensure we have accounts before navigating
       if (accounts && Object.keys(accounts).length > 0) {
-        // Skip route guards since we just set the accounts
+        // Skip route guards since we just set the accounts.
         navigate('/review', false, true);
       } else {
-        errorMessage.textContent = 'No accounts found in the uploaded file.';
-        errorMessage.classList.remove('hidden');
+        showError('We couldn’t find any accounts in that file. Make sure it’s your full YNAB export.');
       }
     } catch (err) {
-      errorMessage.textContent = 'Failed to parse file. Please ensure it\'s a valid YNAB ZIP export with register.csv and plan.csv.';
-      errorMessage.classList.remove('hidden');
+      showError(
+        'We couldn’t read that file. Please make sure it’s a valid YNAB .zip export containing register.csv and plan.csv.'
+      );
       console.error(err);
     }
   }

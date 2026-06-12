@@ -1,12 +1,12 @@
 import fetch from 'node-fetch';
 import { v4 as uuidv4 } from 'uuid';
 
-const MONARCH_EMAIL = 'fazekas.devon+monarch7@gmail.com';
-const MONARCH_PASSWORD = '!f7dTT%USwy$&r';
+const MONARCH_EMAIL = 'fazekas.devon+monarch12@gmail.com';
+const MONARCH_PASSWORD = 'RqOdj9aG&l@NCufuD$2Gko5e^HxSzS';
 
 // 🔐 OTP SUPPORT: If the login requires OTP, paste the code here and rerun the script
 // Leave as null if no OTP is needed or you haven't received one yet
-const OTP_CODE = "116401"; // Set to '123456' if you have an OTP code
+const OTP_CODE = "076021"; // Set to '123456' if you have an OTP code
 
 // 📱 DEVICE UUID: Provide a consistent device UUID to avoid repeated OTP requests
 // Leave as null to generate a new one (will be displayed for future use)
